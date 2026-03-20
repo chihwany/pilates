@@ -249,7 +249,20 @@ export type ExerciseCategory =
   | "STRETCHING"
   | "BREATHING"
   | "POSTURE"
-  | "STRENGTH";
+  | "STRENGTH"
+  | "REHABILITATION"
+  | "PRENATAL"
+  | "POSTNATAL"
+  | "CARDIO_ENDURANCE"
+  | "COORDINATION"
+  | "RELAXATION_RECOVERY"
+  | "SPINE_MOBILITY"
+  | "HIP_PELVIS"
+  | "FOOT_ANKLE"
+  | "FUNCTIONAL"
+  | "FULL_BODY"
+  | "LATERAL_MOVEMENT"
+  | "PELVIC_FLOOR";
 
 // ===== 강사 대시보드 =====
 

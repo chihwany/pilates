@@ -18,6 +18,19 @@ const CATEGORIES: { value: ExerciseCategory; emoji: string; label: string }[] =
     { value: "BREATHING", emoji: "🌬️", label: "호흡/릴랙스" },
     { value: "POSTURE", emoji: "🧍", label: "자세교정" },
     { value: "STRENGTH", emoji: "🏋️", label: "근력강화" },
+    { value: "REHABILITATION", emoji: "🩹", label: "재활" },
+    { value: "PRENATAL", emoji: "🤰", label: "산전" },
+    { value: "POSTNATAL", emoji: "👶", label: "산후" },
+    { value: "CARDIO_ENDURANCE", emoji: "❤️‍🔥", label: "심폐/지구력" },
+    { value: "COORDINATION", emoji: "🤹", label: "협응력" },
+    { value: "RELAXATION_RECOVERY", emoji: "🧖", label: "이완/회복" },
+    { value: "SPINE_MOBILITY", emoji: "🦴", label: "척추가동성" },
+    { value: "HIP_PELVIS", emoji: "🦿", label: "골반/고관절" },
+    { value: "FOOT_ANKLE", emoji: "🦶", label: "발/발목" },
+    { value: "FUNCTIONAL", emoji: "🔄", label: "기능적움직임" },
+    { value: "FULL_BODY", emoji: "🏃", label: "전신통합" },
+    { value: "LATERAL_MOVEMENT", emoji: "↔️", label: "측면움직임" },
+    { value: "PELVIC_FLOOR", emoji: "🫁", label: "골반저근" },
   ];
 
 export function CategorySelector({
