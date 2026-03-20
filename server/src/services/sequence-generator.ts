@@ -204,25 +204,26 @@ export function generateSequence(
   // 4.3 카테고리 기반 선택
   const requestedSet = new Set(requestedCategories);
 
-  // 목표 수업 시간
+  // 목표 수업 시간 & 운동 수
   const TARGET_DURATION_SECONDS = sessionDurationMinutes * 60;
-  const REST_BETWEEN_SETS_SECONDS = 15; // 세트 간 휴식
+  const REST_BETWEEN_SETS_SECONDS = 20; // 세트 간 휴식
+  const TARGET_EXERCISE_COUNT = 10; // 목표 운동 수 (워밍업 2 + 메인 6 + 쿨다운 2)
 
-  // 워밍업 운동 선택 (3개, ~7분)
+  // 워밍업 운동 선택 (2개, ~5분)
   let warmupPool = available.filter((ex) =>
     WARMUP_CATEGORIES.includes(ex.category)
   );
   if (warmupPool.length === 0) warmupPool = available.slice(0, 5);
-  const warmups = shuffleArray(warmupPool).slice(0, 3);
+  const warmups = shuffleArray(warmupPool).slice(0, 2);
 
-  // 쿨다운 운동 선택 (3개, ~7분)
+  // 쿨다운 운동 선택 (2개, ~5분)
   let cooldownPool = available.filter(
     (ex) =>
       COOLDOWN_CATEGORIES.includes(ex.category) &&
       !warmups.some((w) => w.id === ex.id)
   );
   if (cooldownPool.length === 0) cooldownPool = available.slice(0, 5);
-  const cooldowns = shuffleArray(cooldownPool).slice(0, 3);
+  const cooldowns = shuffleArray(cooldownPool).slice(0, 2);
 
   // 메인 운동 선택 (~36분 분량, 동적 개수)
   const usedIds = new Set([
@@ -265,34 +266,12 @@ export function generateSequence(
   );
   const remainingSeconds = TARGET_DURATION_SECONDS - warmupCooldownSeconds;
 
-  // 메인 운동을 50분에 맞게 동적으로 선택
+  // 메인 운동 6개 선택 (워밍업2 + 메인6 + 쿨다운2 = 10개)
+  const mainTargetCount = TARGET_EXERCISE_COUNT - warmups.length - cooldowns.length;
   const setsForDifficulty: Record<string, number> = {
-    beginner: 2, intermediate: 3, advanced: 4,
+    beginner: 3, intermediate: 4, advanced: 5,
   };
-  let mainExercises: CatalogExercise[] = [];
-  let mainTotalSeconds = 0;
-
-  for (const ex of mainCandidates) {
-    const diff = ex.difficulty || targetDifficulty;
-    const sets = setsForDifficulty[diff] || 3;
-    const exDuration = (ex.durationSeconds || 60) * sets + REST_BETWEEN_SETS_SECONDS * (sets - 1);
-    if (mainTotalSeconds + exDuration <= remainingSeconds) {
-      mainExercises.push(ex);
-      mainTotalSeconds += exDuration;
-    }
-    if (mainExercises.length >= 14) break; // 최대 14개
-  }
-
-  // 최소 8개 보장
-  if (mainExercises.length < 8) {
-    const remaining = mainCandidates.filter(
-      (ex) => !mainExercises.some((m) => m.id === ex.id)
-    );
-    mainExercises = [
-      ...mainExercises,
-      ...remaining.slice(0, 8 - mainExercises.length),
-    ];
-  }
+  let mainExercises = mainCandidates.slice(0, mainTargetCount);
 
   // 5. 시퀀스 조립
   const allExercises = [...warmups, ...mainExercises, ...cooldowns];
@@ -308,23 +287,23 @@ export function generateSequence(
   }
 
   const setsMap: Record<string, number> = {
-    beginner: 2,
-    intermediate: 3,
-    advanced: 4,
+    beginner: 3,
+    intermediate: 4,
+    advanced: 5,
   };
   const repsMap: Record<string, number> = {
-    beginner: 8,
-    intermediate: 10,
-    advanced: 12,
+    beginner: 10,
+    intermediate: 12,
+    advanced: 15,
   };
 
-  // 워밍업/쿨다운은 2세트로 고정
+  // 워밍업/쿨다운은 3세트, 메인은 난이도별 세트
   const getExSets = (ex: CatalogExercise, idx: number) => {
     if (idx < warmups.length || idx >= warmups.length + mainExercises.length) {
-      return 2; // 워밍업/쿨다운
+      return 3; // 워밍업/쿨다운
     }
     const diff = ex.difficulty || targetDifficulty;
-    return setsMap[diff] || 3;
+    return setsMap[diff] || 4;
   };
 
   const exercises: SequenceExercise[] = allExercises.map((ex, idx) => {
@@ -358,6 +337,14 @@ export function generateSequence(
       reason = getCategoryReason(ex.category);
     }
 
+    // 운동당 목표 시간 = 총 시간 / 운동 수 (휴식 포함)
+    const targetPerExercise = Math.floor(TARGET_DURATION_SECONDS / allExercises.length);
+    const baseDuration = ex.durationSeconds || 60;
+    // 세트당 시간 = (운동당 목표 시간 - 세트간 휴식) / 세트 수
+    const restTotal = REST_BETWEEN_SETS_SECONDS * (sets - 1);
+    const targetDurationPerSet = Math.floor((targetPerExercise - restTotal) / sets);
+    const adjustedDuration = Math.max(baseDuration, Math.min(targetDurationPerSet, 120));
+
     return {
       catalogId: ex.id,
       name: ex.name,
@@ -365,8 +352,8 @@ export function generateSequence(
       category: ex.category,
       equipment: ex.equipment || "mat",
       sets,
-      reps: repsMap[diff] || 10,
-      durationSeconds: ex.durationSeconds || 60,
+      reps: repsMap[diff] || 12,
+      durationSeconds: adjustedDuration,
       order: idx + 1,
       reason,
     };
