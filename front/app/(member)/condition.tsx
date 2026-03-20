@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Platform, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import type {
   ConditionAnalysisDetailed,
   Mood,
@@ -12,6 +13,7 @@ import { ConditionEditor } from "@/components/condition/ConditionEditor";
 import { CategorySelector } from "@/components/exercise/CategorySelector";
 import Button from "@/components/ui/Button";
 import { analyzeCondition, registerCondition } from "@/lib/api/condition";
+import { generateSequence } from "@/lib/api/sequences";
 
 const showAlert = (title: string, msg: string) => {
   if (Platform.OS === "web") window.alert(`${title}\n${msg}`);
@@ -21,6 +23,7 @@ const showAlert = (title: string, msg: string) => {
 type ScreenState = "camera" | "edit";
 
 export default function ConditionScreen() {
+  const router = useRouter();
   const [screenState, setScreenState] = useState<ScreenState>("camera");
   const [analysis, setAnalysis] = useState<ConditionAnalysisDetailed | null>(null);
 
@@ -83,14 +86,26 @@ export default function ConditionScreen() {
       requestedCategories: categories,
     });
 
-    setIsSubmitting(false);
-    if (res.success) {
-      showAlert("등록 완료", "컨디션이 등록되었습니다. 시퀀스가 생성됩니다.");
+    if (res.success && res.data) {
+      // Trigger sequence generation in background
+      const sessionData = res.data as { sessionId?: string };
+      if (sessionData.sessionId) {
+        generateSequence({ sessionId: sessionData.sessionId }).catch(() => {
+          // Sequence generation happens async; errors handled on today tab
+        });
+      }
+
+      // Reset state
       setScreenState("camera");
       setAnalysis(null);
       setNote("");
       setCategories([]);
+      setIsSubmitting(false);
+
+      // Navigate to today tab to see loading / result
+      router.replace("/(member)/");
     } else {
+      setIsSubmitting(false);
       showAlert("등록 실패", res.error?.message || "다시 시도해주세요.");
     }
   };

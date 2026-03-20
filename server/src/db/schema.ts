@@ -78,3 +78,38 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ===== exerciseCatalog 테이블 =====
+export const exerciseCatalog = pgTable("exercise_catalog", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull().unique(),
+  nameKo: text("name_ko").notNull(),
+  category: text("category").notNull(),
+  difficulty: text("difficulty").notNull(),
+  equipment: text("equipment").default("mat"),
+  muscleGroups: jsonb("muscle_groups").default([]),
+  contraindications: jsonb("contraindications").default([]),
+  durationSeconds: integer("duration_seconds").default(60),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+});
+
+// ===== exerciseSequences 테이블 =====
+export const exerciseSequences = pgTable("exercise_sequences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id")
+    .references(() => sessions.id)
+    .notNull(),
+  memberId: uuid("member_id")
+    .references(() => members.id)
+    .notNull(),
+  exercises: jsonb("exercises").notNull(),
+  totalDurationMinutes: integer("total_duration_minutes"),
+  difficulty: text("difficulty"),
+  focusAreas: jsonb("focus_areas").default([]),
+  aiPromptUsed: text("ai_prompt_used"),
+  wasModified: boolean("was_modified").default(false),
+  instructorNotes: text("instructor_notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});

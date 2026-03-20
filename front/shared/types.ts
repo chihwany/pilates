@@ -145,7 +145,34 @@ export interface Exercise {
   notes?: string;
 }
 
+export interface ExerciseInSequence {
+  catalogId: string;
+  name: string;
+  nameKo: string;
+  category: string;
+  equipment: string;
+  sets: number;
+  reps?: number;
+  durationSeconds: number;
+  order: number;
+  reason: string;
+}
+
 export interface ExerciseSequence {
+  id: string;
+  sessionId: string;
+  memberId: string;
+  exercises: ExerciseInSequence[];
+  totalDurationMinutes: number;
+  difficulty: string;
+  focusAreas: string[];
+  sequenceNote?: string;
+  wasModified: boolean;
+  createdAt: string;
+}
+
+/** @deprecated Use ExerciseSequence instead */
+export interface ExerciseSequenceLegacy {
   id: string;
   sessionId: string;
   exercises: Exercise[];

@@ -91,7 +91,29 @@ export const conditionRegisterSchema = z.object({
   requestedCategories: z.array(z.string()).optional().default([]),
 });
 
+// ===== 시퀀스 =====
+
+export const generateSequenceSchema = z.object({
+  sessionId: z.string().uuid("유효한 세션 ID를 입력하세요").optional(),
+  memberId: z.string().uuid("유효한 회원 ID를 입력하세요").optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "날짜 형식은 YYYY-MM-DD이어야 합니다")
+    .optional(),
+}).refine(
+  (data) => data.sessionId || (data.memberId && data.date),
+  { message: "sessionId 또는 (memberId + date)가 필요합니다" }
+);
+
+export const exerciseFilterSchema = z.object({
+  category: z.string().optional(),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  equipment: z.string().optional(),
+});
+
 // Type exports
+export type GenerateSequenceInput = z.infer<typeof generateSequenceSchema>;
+export type ExerciseFilterInput = z.infer<typeof exerciseFilterSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;

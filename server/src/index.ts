@@ -8,6 +8,8 @@ import auth from "./routes/auth";
 import membersRouter from "./routes/members";
 import schedulesRouter from "./routes/schedules";
 import conditionRouter from "./routes/condition";
+import sequencesRouter from "./routes/sequences";
+import exercisesRouter from "./routes/exercises";
 
 const app = new Hono();
 
@@ -45,6 +47,8 @@ app.route("/api/auth", auth);
 app.route("/api/members", membersRouter);
 app.route("/api/schedules", schedulesRouter);
 app.route("/api/condition", conditionRouter);
+app.route("/api/sequences", sequencesRouter);
+app.route("/api/exercises", exercisesRouter);
 
 // ---------------------
 // Global Error Handler
