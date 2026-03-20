@@ -206,24 +206,24 @@ export function generateSequence(
 
   // 목표 수업 시간 & 운동 수
   const TARGET_DURATION_SECONDS = sessionDurationMinutes * 60;
-  const REST_BETWEEN_SETS_SECONDS = 20; // 세트 간 휴식
-  const TARGET_EXERCISE_COUNT = 10; // 목표 운동 수 (워밍업 2 + 메인 6 + 쿨다운 2)
+  const REST_BETWEEN_SETS_SECONDS = 30; // 세트 간 휴식 + 전환 시간
+  const TARGET_EXERCISE_COUNT = 8; // 목표 운동 수 (워밍업 1 + 메인 6 + 쿨다운 1)
 
-  // 워밍업 운동 선택 (2개, ~5분)
+  // 워밍업 운동 선택 (1개, ~6분)
   let warmupPool = available.filter((ex) =>
     WARMUP_CATEGORIES.includes(ex.category)
   );
   if (warmupPool.length === 0) warmupPool = available.slice(0, 5);
-  const warmups = shuffleArray(warmupPool).slice(0, 2);
+  const warmups = shuffleArray(warmupPool).slice(0, 1);
 
-  // 쿨다운 운동 선택 (2개, ~5분)
+  // 쿨다운 운동 선택 (1개, ~6분)
   let cooldownPool = available.filter(
     (ex) =>
       COOLDOWN_CATEGORIES.includes(ex.category) &&
       !warmups.some((w) => w.id === ex.id)
   );
   if (cooldownPool.length === 0) cooldownPool = available.slice(0, 5);
-  const cooldowns = shuffleArray(cooldownPool).slice(0, 2);
+  const cooldowns = shuffleArray(cooldownPool).slice(0, 1);
 
   // 메인 운동 선택 (~36분 분량, 동적 개수)
   const usedIds = new Set([
@@ -287,8 +287,8 @@ export function generateSequence(
   }
 
   const setsMap: Record<string, number> = {
-    beginner: 3,
-    intermediate: 4,
+    beginner: 4,
+    intermediate: 5,
     advanced: 5,
   };
   const repsMap: Record<string, number> = {
@@ -303,7 +303,7 @@ export function generateSequence(
       return 3; // 워밍업/쿨다운
     }
     const diff = ex.difficulty || targetDifficulty;
-    return setsMap[diff] || 4;
+    return setsMap[diff] || 5;
   };
 
   const exercises: SequenceExercise[] = allExercises.map((ex, idx) => {
