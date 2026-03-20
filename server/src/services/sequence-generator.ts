@@ -79,13 +79,25 @@ export function generateSequence(
   let available = catalog.filter((ex) => ex.isActive !== false);
 
   // 2. 회원 bodyConditions 기반 금기 운동 필터링
-  const bodyConditions = (member.bodyConditions || []) as string[];
-  if (bodyConditions.length > 0) {
+  // bodyConditions는 두 가지 형태 가능:
+  // - string[] (단순 문자열 배열): ["측만증", "허리디스크"]
+  // - object[] (구조화된 객체 배열): [{type:"측만증", area:"허리", severity:"moderate"}]
+  const rawConditions = (member.bodyConditions || []) as unknown[];
+  const conditionStrings: string[] = rawConditions.flatMap((cond) => {
+    if (typeof cond === "string") return [cond];
+    if (typeof cond === "object" && cond !== null) {
+      const obj = cond as Record<string, unknown>;
+      // type과 area를 모두 매칭 대상으로 사용
+      return [obj.type, obj.area].filter((v): v is string => typeof v === "string");
+    }
+    return [];
+  });
+
+  if (conditionStrings.length > 0) {
     available = available.filter((ex) => {
       const contras = (ex.contraindications || []) as string[];
-      // 회원의 bodyConditions와 운동의 contraindications가 겹치면 제외
       return !contras.some((contra) =>
-        bodyConditions.some(
+        conditionStrings.some(
           (cond) =>
             cond.toLowerCase().includes(contra.toLowerCase()) ||
             contra.toLowerCase().includes(cond.toLowerCase())
@@ -95,9 +107,13 @@ export function generateSequence(
   }
 
   // 3. 컨디션 기반 난이도 결정
-  const energy = conditionFinal?.energy?.level ?? 5;
-  const stress = conditionFinal?.stress?.level ?? 5;
-  const sleepQuality = conditionFinal?.sleep?.quality ?? "FAIR";
+  // conditionFinal은 두 가지 형식 가능:
+  // - {energy: 7, stress: 3, sleep: "GOOD"} (프론트에서 수정 후)
+  // - {energy: {level: 7}, stress: {level: 3}, sleep: {quality: "GOOD"}} (AI 원본)
+  const cf = conditionFinal as Record<string, unknown> | null;
+  const energy = typeof cf?.energy === "number" ? cf.energy : (cf?.energy as any)?.level ?? 5;
+  const stress = typeof cf?.stress === "number" ? cf.stress : (cf?.stress as any)?.level ?? 5;
+  const sleepQuality = typeof cf?.sleep === "string" ? cf.sleep : (cf?.sleep as any)?.quality ?? "FAIR";
 
   let targetDifficulty: string;
   let intensityNote: string;
@@ -139,7 +155,38 @@ export function generateSequence(
     avoidExercises?: string[];
     goals?: string[];
     sessionDurationMinutes?: number;
+    isPrenatal?: boolean;
+    isPostnatal?: boolean;
   };
+
+  // 4.0 산전/산후 카테고리 필터링
+  const isPrenatal = prefs.isPrenatal === true;
+  const isPostnatal = prefs.isPostnatal === true;
+
+  if (!isPrenatal) {
+    // 산전 회원이 아니면 prenatal 카테고리 운동 제외
+    available = available.filter((ex) => ex.category !== "prenatal");
+  }
+  if (!isPostnatal) {
+    // 산후 회원이 아니면 postnatal 카테고리 운동 제외
+    available = available.filter((ex) => ex.category !== "postnatal");
+  }
+
+  // 산전 회원: 고강도/앙와위 위험 운동 제외, prenatal 카테고리 우선
+  if (isPrenatal) {
+    available = available.filter((ex) => ex.difficulty !== "advanced");
+    // prenatal을 요청 카테고리에 자동 추가
+    if (!requestedCategories.includes("prenatal")) {
+      requestedCategories = [...requestedCategories, "prenatal"];
+    }
+  }
+
+  // 산후 회원: postnatal 카테고리 우선
+  if (isPostnatal) {
+    if (!requestedCategories.includes("postnatal")) {
+      requestedCategories = [...requestedCategories, "postnatal"];
+    }
+  }
 
   // 4.1 avoidExercises에 포함된 운동 제외
   if (prefs.avoidExercises && prefs.avoidExercises.length > 0) {
@@ -354,12 +401,20 @@ export function generateSequence(
     goalsNote = ` 목표: ${prefs.goals.join(", ")}.`;
   }
 
+  // 산전/산후 메모
+  let specialNote = "";
+  if (isPrenatal) {
+    specialNote = " 산전 회원을 위해 안전한 운동 위주로 구성했습니다. 고강도 운동은 제외되었습니다.";
+  } else if (isPostnatal) {
+    specialNote = " 산후 회복을 위한 운동이 포함되었습니다. 골반저근 및 코어 회복에 중점을 두었습니다.";
+  }
+
   return {
     exercises,
     totalDurationMinutes,
     difficulty: targetDifficulty,
     focusAreas,
-    sequenceNote: intensityNote + moodNote + targetMuscleNote + goalsNote,
+    sequenceNote: intensityNote + moodNote + targetMuscleNote + goalsNote + specialNote,
   };
 }
 

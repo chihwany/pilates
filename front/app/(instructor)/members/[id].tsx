@@ -119,6 +119,8 @@ export default function MemberDetailScreen() {
       avoidExercises: prefs.avoidExercises || [],
       goals: prefs.goals || [],
       sessionDurationMinutes: prefs.sessionDurationMinutes || 50,
+      isPrenatal: prefs.isPrenatal || false,
+      isPostnatal: prefs.isPostnatal || false,
     });
     setAvoidExercisesText((prefs.avoidExercises || []).join(", "));
     setShowAddCondition(false);
@@ -544,6 +546,59 @@ export default function MemberDetailScreen() {
                   ))}
                 </View>
               </View>
+
+              {/* 산전/산후 */}
+              <View>
+                <Text className="text-xs text-gray-500 mb-2">특수 상태</Text>
+                <View className="flex-row gap-3">
+                  <TouchableOpacity
+                    onPress={() =>
+                      setEditPreferences((prev) => ({
+                        ...prev,
+                        isPrenatal: !prev.isPrenatal,
+                        isPostnatal: prev.isPrenatal ? prev.isPostnatal : false,
+                      }))
+                    }
+                    className={`flex-1 py-3 rounded-xl items-center border ${
+                      editPreferences.isPrenatal
+                        ? "bg-[#EC4899] border-[#EC4899]"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text className="text-lg mb-1">{"🤰"}</Text>
+                    <Text
+                      className={`text-sm font-medium ${
+                        editPreferences.isPrenatal ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      산전
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setEditPreferences((prev) => ({
+                        ...prev,
+                        isPostnatal: !prev.isPostnatal,
+                        isPrenatal: prev.isPostnatal ? prev.isPrenatal : false,
+                      }))
+                    }
+                    className={`flex-1 py-3 rounded-xl items-center border ${
+                      editPreferences.isPostnatal
+                        ? "bg-[#8B5CF6] border-[#8B5CF6]"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <Text className="text-lg mb-1">{"👶"}</Text>
+                    <Text
+                      className={`text-sm font-medium ${
+                        editPreferences.isPostnatal ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      산후
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           ) : member.exercisePreferences ? (
             <>
@@ -591,10 +646,23 @@ export default function MemberDetailScreen() {
                 </View>
               )}
 
+              {(member.exercisePreferences.isPrenatal || member.exercisePreferences.isPostnatal) && (
+                <View className="flex-row gap-2 mb-3 pt-2 border-t border-gray-100">
+                  {member.exercisePreferences.isPrenatal && (
+                    <Badge label="🤰 산전" variant="primary" />
+                  )}
+                  {member.exercisePreferences.isPostnatal && (
+                    <Badge label="👶 산후" variant="primary" />
+                  )}
+                </View>
+              )}
+
               {!(member.exercisePreferences.targetMuscles || []).length &&
                 !(member.exercisePreferences.avoidExercises || []).length &&
                 !(member.exercisePreferences.goals || []).length &&
-                !member.exercisePreferences.sessionDurationMinutes && (
+                !member.exercisePreferences.sessionDurationMinutes &&
+                !member.exercisePreferences.isPrenatal &&
+                !member.exercisePreferences.isPostnatal && (
                   <Text className="text-sm text-gray-400">
                     등록된 타겟 근육이 없습니다
                   </Text>

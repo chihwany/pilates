@@ -22,10 +22,13 @@ sequencesRouter.use("*", authMiddleware);
 
 // POST /api/sequences/generate - 시퀀스 생성
 sequencesRouter.post("/generate", async (c) => {
+  try {
   const body = await c.req.json();
+  console.log("[sequences/generate] body:", JSON.stringify(body));
   const result = generateSequenceSchema.safeParse(body);
 
   if (!result.success) {
+    console.log("[sequences/generate] validation error:", result.error.errors);
     return c.json(
       {
         error: {
@@ -172,6 +175,12 @@ sequencesRouter.post("/generate", async (c) => {
       updatedAt: sequence.updatedAt.toISOString(),
     },
   });
+  } catch (err) {
+    console.error("[sequences/generate] UNCAUGHT ERROR:", err);
+    return c.json({
+      error: { code: "INTERNAL_ERROR", message: String(err), statusCode: 500 },
+    }, 500);
+  }
 });
 
 // GET /api/sequences/today - 현재 로그인 회원의 오늘 시퀀스

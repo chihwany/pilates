@@ -101,12 +101,24 @@ export default function ConditionScreen() {
     setScreenState("generating");
 
     const sessionData = res.data as { id?: string };
+    let sequenceSuccess = false;
+
     if (sessionData.id) {
       try {
-        await generateSequence({ sessionId: sessionData.id });
-      } catch {
-        // 시퀀스 생성 실패해도 오늘 탭으로 이동
+        const seqRes = await generateSequence({ sessionId: sessionData.id });
+        console.log("[condition] generateSequence result:", JSON.stringify(seqRes).substring(0, 200));
+        if (seqRes.success) {
+          sequenceSuccess = true;
+        } else {
+          console.log("[condition] generateSequence failed:", seqRes.error?.message);
+          showAlert("시퀀스 생성 실패", seqRes.error?.message || "시퀀스 생성에 실패했습니다. 오늘 탭에서 다시 시도해주세요.");
+        }
+      } catch (err) {
+        console.log("[condition] generateSequence error:", err);
+        showAlert("시퀀스 생성 오류", "네트워크 오류가 발생했습니다.");
       }
+    } else {
+      console.log("[condition] no sessionId in response:", JSON.stringify(res.data).substring(0, 200));
     }
 
     // 완료 → 오늘 탭으로 이동

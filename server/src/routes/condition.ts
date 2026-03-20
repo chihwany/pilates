@@ -85,9 +85,11 @@ conditionRouter.post("/analyze", async (c) => {
 conditionRouter.post("/register", async (c) => {
   const authUser = c.get("user") as AuthUser;
   const body = await c.req.json();
+  console.log("[condition/register] body:", JSON.stringify(body).substring(0, 500));
   const result = conditionRegisterSchema.safeParse(body);
 
   if (!result.success) {
+    console.log("[condition/register] validation error:", result.error.errors);
     return c.json(
       {
         error: {

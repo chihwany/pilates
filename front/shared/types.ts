@@ -77,6 +77,8 @@ export interface ExercisePreferences {
   avoidExercises: string[];
   goals: string[];
   sessionDurationMinutes: number;
+  isPrenatal?: boolean;
+  isPostnatal?: boolean;
 }
 
 export interface Member {
