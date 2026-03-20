@@ -10,6 +10,7 @@ import schedulesRouter from "./routes/schedules";
 import conditionRouter from "./routes/condition";
 import sequencesRouter from "./routes/sequences";
 import exercisesRouter from "./routes/exercises";
+import sessionsRouter from "./routes/sessions";
 
 const app = new Hono();
 
@@ -49,6 +50,7 @@ app.route("/api/schedules", schedulesRouter);
 app.route("/api/condition", conditionRouter);
 app.route("/api/sequences", sequencesRouter);
 app.route("/api/exercises", exercisesRouter);
+app.route("/api/sessions", sessionsRouter);
 
 // ---------------------
 // Global Error Handler

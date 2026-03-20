@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, ilike } from "drizzle-orm";
 import { db } from "../db/index";
 import { exerciseCatalog } from "../db/schema";
 import { authMiddleware } from "../middleware/auth";
@@ -28,11 +28,20 @@ exercisesRouter.get("/", async (c) => {
     );
   }
 
-  const { category, difficulty, equipment } = filterResult.data;
+  const { search, category, difficulty, equipment } = filterResult.data;
 
   // 동적 필터 조건 구성
   const conditions = [eq(exerciseCatalog.isActive, true)];
 
+  if (search) {
+    const searchPattern = `%${search}%`;
+    conditions.push(
+      or(
+        ilike(exerciseCatalog.name, searchPattern),
+        ilike(exerciseCatalog.nameKo, searchPattern)
+      )!
+    );
+  }
   if (category) {
     conditions.push(eq(exerciseCatalog.category, category));
   }

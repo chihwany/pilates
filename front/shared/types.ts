@@ -249,3 +249,41 @@ export type ExerciseCategory =
   | "BREATHING"
   | "POSTURE"
   | "STRENGTH";
+
+// ===== 강사 대시보드 =====
+
+export interface DashboardSession {
+  memberId: string;
+  memberName: string;
+  startTime: string;
+  conditionChecked: boolean;
+  conditionSummary?: string;
+  sequenceGenerated: boolean;
+  sequenceId?: string;
+  sessionId?: string;
+  difficulty?: string;
+  exerciseCount?: number;
+  totalDurationMinutes?: number;
+  wasModified?: boolean;
+}
+
+export interface DashboardData {
+  date: string;
+  totalMembers: number;
+  conditionChecked: number;
+  sequenceGenerated: number;
+  sessions: DashboardSession[];
+}
+
+// ===== 운동 카탈로그 =====
+
+export interface ExerciseCatalogItem {
+  id: string;
+  name: string;
+  nameKo: string;
+  category: string;
+  equipment: string;
+  difficulty: string;
+  description?: string;
+  descriptionKo?: string;
+}

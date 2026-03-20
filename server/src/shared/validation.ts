@@ -106,9 +106,17 @@ export const generateSequenceSchema = z.object({
 );
 
 export const exerciseFilterSchema = z.object({
+  search: z.string().optional(),
   category: z.string().optional(),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   equipment: z.string().optional(),
+});
+
+// ===== 시퀀스 수정 =====
+
+export const updateSequenceSchema = z.object({
+  exercises: z.array(z.record(z.unknown())),
+  instructorNotes: z.string().optional(),
 });
 
 // Type exports
@@ -123,3 +131,4 @@ export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
 export type CreateScheduleInput = z.infer<typeof createScheduleSchema>;
 export type UpdateScheduleInput = z.infer<typeof updateScheduleSchema>;
 export type ConditionRegisterInput = z.infer<typeof conditionRegisterSchema>;
+export type UpdateSequenceInput = z.infer<typeof updateSequenceSchema>;

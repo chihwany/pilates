@@ -7,9 +7,12 @@ import {
   exerciseSequences,
   exerciseCatalog,
 } from "../db/schema";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, requireRole } from "../middleware/auth";
 import type { AuthUser } from "../middleware/auth";
-import { generateSequenceSchema } from "../shared/validation";
+import {
+  generateSequenceSchema,
+  updateSequenceSchema,
+} from "../shared/validation";
 import { generateSequence } from "../services/sequence-generator";
 
 const sequencesRouter = new Hono();
@@ -286,5 +289,179 @@ sequencesRouter.get("/:sessionId", async (c) => {
     },
   });
 });
+
+// PUT /api/sequences/:id - 시퀀스 수정 (강사 전용)
+sequencesRouter.put("/:id", requireRole("instructor"), async (c) => {
+  const sequenceId = c.req.param("id");
+  const body = await c.req.json();
+  const result = updateSequenceSchema.safeParse(body);
+
+  if (!result.success) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: result.error.errors.map((e) => e.message).join(", "),
+          statusCode: 400,
+        },
+      },
+      400
+    );
+  }
+
+  // 시퀀스 존재 확인
+  const [existing] = await db
+    .select()
+    .from(exerciseSequences)
+    .where(eq(exerciseSequences.id, sequenceId))
+    .limit(1);
+
+  if (!existing) {
+    return c.json(
+      {
+        error: {
+          code: "NOT_FOUND",
+          message: "시퀀스를 찾을 수 없습니다",
+          statusCode: 404,
+        },
+      },
+      404
+    );
+  }
+
+  const data = result.data;
+
+  const [updated] = await db
+    .update(exerciseSequences)
+    .set({
+      exercises: data.exercises,
+      instructorNotes: data.instructorNotes ?? existing.instructorNotes,
+      wasModified: true,
+      updatedAt: new Date(),
+    })
+    .where(eq(exerciseSequences.id, sequenceId))
+    .returning();
+
+  if (!updated) {
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "시퀀스 수정에 실패했습니다",
+          statusCode: 500,
+        },
+      },
+      500
+    );
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      ...updated,
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+    },
+  });
+});
+
+// DELETE /api/sequences/:id/exercises/:order - 특정 순서 운동 삭제 (강사 전용)
+sequencesRouter.delete(
+  "/:id/exercises/:order",
+  requireRole("instructor"),
+  async (c) => {
+    const sequenceId = c.req.param("id");
+    const orderParam = Number(c.req.param("order"));
+
+    if (isNaN(orderParam) || orderParam < 0) {
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "유효한 운동 순서(order)를 입력하세요",
+            statusCode: 400,
+          },
+        },
+        400
+      );
+    }
+
+    // 시퀀스 존재 확인
+    const [existing] = await db
+      .select()
+      .from(exerciseSequences)
+      .where(eq(exerciseSequences.id, sequenceId))
+      .limit(1);
+
+    if (!existing) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "시퀀스를 찾을 수 없습니다",
+            statusCode: 404,
+          },
+        },
+        404
+      );
+    }
+
+    const exercises = (existing.exercises as Record<string, unknown>[]) || [];
+
+    if (orderParam >= exercises.length) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "해당 순서의 운동을 찾을 수 없습니다",
+            statusCode: 404,
+          },
+        },
+        404
+      );
+    }
+
+    // 해당 순서의 운동 삭제
+    exercises.splice(orderParam, 1);
+
+    // order 재정렬
+    const reordered = exercises.map((ex, idx) => ({
+      ...ex,
+      order: idx,
+    }));
+
+    const [updated] = await db
+      .update(exerciseSequences)
+      .set({
+        exercises: reordered,
+        wasModified: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(exerciseSequences.id, sequenceId))
+      .returning();
+
+    if (!updated) {
+      return c.json(
+        {
+          error: {
+            code: "INTERNAL_SERVER_ERROR",
+            message: "운동 삭제에 실패했습니다",
+            statusCode: 500,
+          },
+        },
+        500
+      );
+    }
+
+    return c.json({
+      success: true,
+      data: {
+        ...updated,
+        createdAt: updated.createdAt.toISOString(),
+        updatedAt: updated.updatedAt.toISOString(),
+      },
+    });
+  }
+);
 
 export default sequencesRouter;
