@@ -63,8 +63,13 @@
 
 ### 2.3 회원 프로필 관리
 - **기본 정보**: 이름, 연락처, 생년월일
-- **신체 상태**: 측만증, 후만증, 디스크, 무릎 문제 등 (구조화된 태그 + 심각도)
-- **운동 선호도**: 선호 기구(리포머, 매트, 체어 등), 피하고 싶은 운동, 운동 목표
+- **신체 상태**: 측만증, 후만증, 디스크, 무릎 문제 등 (구조화된 태그: 유형/부위/심각도/메모)
+- **산전/산후**: `isPrenatal`/`isPostnatal` 플래그 (강사가 토글)
+  - 산전 회원: prenatal 운동 자동 포함, 고강도 운동 자동 제외
+  - 산전 미체크 회원: prenatal 운동 자동 제외
+  - 시퀀스 노트에 산전/산후 안내 포함
+- **타겟 근육**: 11개 근육 그룹 태그 토글 (core, glutes, hamstrings, quadriceps, back, shoulders, arms, chest, hip_flexors, calves, inner_thighs)
+- **운동 선호도**: 선호 기구(리포머, 매트, 체어 등), 피하고 싶은 운동(avoidExercises), 운동 목표, 세션 시간(sessionDurationMinutes)
 - **피트니스 레벨**: 초급 / 중급 / 고급
 
 ### 2.4 주간 수업 스케줄 관리
@@ -77,13 +82,14 @@
 ### 2.5 AI 운동 시퀀스 생성
 - 회원 프로필 + 오늘 컨디션 + 추가 운동 요청 + 최근 운동 이력을 종합하여 LLM이 시퀀스 생성
 - **추가 운동 카테고리 선택**: 회원이 컨디션 체크 후 1~2개 운동 카테고리를 선택 가능 (선택 사항)
-  - 예: "상체 강화", "하체 스트레칭", "코어 집중", "유연성", "밸런스" 등
+  - 22개 카테고리에서 선택 (기본 9개 + 확장 13개: rehabilitation, prenatal, postnatal, cardio_endurance, coordination, relaxation_recovery, spine_mobility, hip_pelvis, foot_ankle, functional, full_body, lateral_movement, pelvic_floor)
   - 선택한 카테고리가 시퀀스 생성 시 우선적으로 반영됨
-- **50분 수업 기준** 시퀀스: 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분) = 총 50분
+- **354개 운동 카탈로그**: 22개 카테고리로 분류된 필라테스 운동 데이터베이스
+- **회원별 세션 시간** 기준 시퀀스: 기본 50분 (회원 프로필 sessionDurationMinutes로 조절 가능). 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분) = 총 50분
   - 세트 간 휴식 15초 포함
   - 동적 운동 수 조절 (50분에 맞게)
 - 시퀀스 구성 요소:
-  - 운동명, 카테고리(웜업/코어/상체/하체/스트레칭/쿨다운)
+  - 운동명, 카테고리(22개: warm_up, cool_down, core, upper_body, lower_body, flexibility, balance, breath, strength, posture, rehabilitation, prenatal, postnatal, cardio_endurance, coordination, relaxation_recovery, spine_mobility, hip_pelvis, foot_ankle, functional, full_body, lateral_movement, pelvic_floor)
   - 기구, 시간, 세트/횟수, 난이도
   - 신체 집중 부위, 수정사항(modification)
   - 이 운동을 선택한 이유 설명
@@ -93,6 +99,10 @@
   - 수면 부족 → 고강도 제외, 점진적 강도 증가
   - 안면 근긴장 감지 → 해당 부위 이완 운동 추가
   - 금기 운동 자동 제외
+  - 산전 회원: prenatal 운동 자동 포함, 고강도 자동 제외
+  - 산전 미체크 회원: prenatal 운동 자동 제외
+  - 타겟 근육(targetMuscles) 기반 운동 우선 선택
+  - 피해야 할 운동(avoidExercises) 자동 필터링
 - **컨디션 미체크 시**: 컨디션 정보를 제외한 나머지 정보(프로필, 운동 이력, 선호도)만으로 시퀀스 생성
 - **오후 1시 자동 마감**: 오후 1시까지 컨디션 체크를 하지 않은 회원은 자동으로 컨디션 없이 시퀀스 생성
 
@@ -104,10 +114,13 @@
 
 ### 2.7 강사 리뷰 및 조정 (선택적)
 - 자동 생성된 시퀀스가 즉시 회원에게 배정됨
-- 강사는 대시보드에서 오늘의 세션 현황을 확인
+- 강사 대시보드에서 오늘 세션 현황 확인 (통계 카드 + 세션 목록)
+- SessionStatusCard: 상태 뱃지 (대기중/컨디션완료/시퀀스완료/수정됨)
 - 필요시 시퀀스를 선택하여 리뷰:
-  - 드래그 앤 드롭으로 순서 변경
-  - 운동 추가/삭제/수정
+  - 인라인 세트/횟수 수정
+  - 운동 삭제 (DELETE /api/sequences/:id/exercises/:order + 자동 reorder)
+  - 운동 추가 모달 (카탈로그 검색: 이름/한국어명)
+- 수정 시 wasModified 플래그 자동 설정 (PUT /api/sequences/:id)
 - 수정 내용은 즉시 회원에게 반영
 
 ### 2.8 회원 뷰

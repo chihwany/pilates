@@ -7,7 +7,7 @@
 ```
 Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Sprint 4 ──→ Sprint 5 ──→ Sprint 6
 프로젝트셋업   인증 연동    스케줄+      시퀀스 생성   강사 대시보드  알림+자동화    폴리싱
-              로그인/가입   컨디션 체크   E2E 연결     시퀀스 편집   히스토리      배포 준비
+  ✅완료      ✅완료       ✅완료       ✅완료       ✅완료       미착수        미착수
 ```
 
 ---
@@ -145,7 +145,7 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
 | BE-3-1 | exerciseSequences 스키마 | `server/src/db/schema.ts` | + 마이그레이션 |
-| BE-3-2 | exerciseCatalog 스키마 + 시드 | `server/src/db/schema.ts`, `server/src/db/seed.ts` | 필라테스 운동 50개+ |
+| BE-3-2 | exerciseCatalog 스키마 + 시드 | `server/src/db/schema.ts`, `server/src/db/seed.ts` | 필라테스 운동 50개+ (Sprint 4에서 354개로 확장) |
 | BE-3-3 | Claude Text API 서비스 | `server/src/services/claude-text.ts` | SDK 연동 |
 | BE-3-4 | 시퀀스 생성 서비스 | `server/src/services/sequence-generator.ts` | 프롬프트 구성 + JSON 파싱 |
 | BE-3-5 | 세션 CRUD API | `server/src/routes/sessions.ts` | POST/GET/PUT |
@@ -192,39 +192,43 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 
 ---
 
-## Sprint 4: 강사 대시보드 + 시퀀스 편집
+## Sprint 4: 강사 대시보드 + 시퀀스 편집 + 카탈로그 확장 + 산전/산후 ✅ 완료
 
-> 강사 측 핵심 기능. 대시보드에서 오늘 현황 확인 + 시퀀스 리뷰/수정.
+> 강사 측 핵심 기능. 대시보드에서 오늘 현황 확인 + 시퀀스 리뷰/수정. 운동 카탈로그 354개 확장, 산전/산후 지원.
 
 ### BE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
 | BE-4-1 | 대시보드용 통합 조회 API | `server/src/routes/sessions.ts` | 오늘 스케줄 기반 세션 + 컨디션 + 시퀀스 통합 |
-| BE-4-2 | 시퀀스 수정 API 보완 | `server/src/routes/sequences.ts` | wasModified 플래그, 운동 추가/삭제 |
-| BE-4-3 | 운동 카탈로그 검색 API | `server/src/routes/exercises.ts` | 카테고리/난이도/기구/검색 필터 |
+| BE-4-2 | 시퀀스 수정 API 보완 | `server/src/routes/sequences.ts` | PUT wasModified 플래그, DELETE 운동 삭제 + reorder |
+| BE-4-3 | 운동 카탈로그 검색 API | `server/src/routes/exercises.ts` | 이름/한국어명 검색 필터 |
+| BE-4-4 | 운동 카탈로그 확장 | `server/src/db/seed.ts` | 50개 → 230개 → 354개, 9개 → 22개 카테고리 |
+| BE-4-5 | 산전/산후 지원 | `server/src/db/schema.ts` | isPrenatal/isPostnatal 필드, 시퀀스 생성기 반영 |
+| BE-4-6 | 회원 편집 API 보완 | `server/src/routes/members.ts` | 산전/산후, 타겟 근육, avoidExercises, 세션 시간 |
+| BE-4-7 | 시퀀스 생성기 버그 수정 | `server/src/services/sequence-generator.ts` | bodyConditions/conditionFinal 다형 처리 |
 
 ### FE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-4-1 | 대시보드 화면 | `front/app/(instructor)/dashboard.tsx` | 오늘 현황 요약 + 세션 목록 |
-| FE-4-2 | SessionStatusCard | `front/components/dashboard/SessionStatusCard.tsx` | 생성완료/미체크/자동생성 상태 |
+| FE-4-1 | 대시보드 화면 | `front/app/(instructor)/dashboard.tsx` | 오늘 현황 통계 카드 + 세션 목록 |
+| FE-4-2 | SessionStatusCard | `front/components/dashboard/SessionStatusCard.tsx` | 상태 뱃지 (대기중/컨디션완료/시퀀스완료/수정됨) |
 | FE-4-3 | ConditionSummary | `front/components/dashboard/ConditionSummary.tsx` | 체크 현황 요약 |
-| FE-4-4 | 시퀀스 리뷰 화면 | `front/app/(instructor)/review.tsx` | 운동 목록 + 컨디션 정보 |
-| FE-4-5 | SequenceEditor | `front/components/exercise/SequenceEditor.tsx` | 드래그앤드롭 순서 변경 |
-| FE-4-6 | 운동 추가 모달 | 카탈로그 검색 → 선택 → 추가 | |
-| FE-4-7 | 운동 인라인 편집 | 세트/횟수/시간 수정 | |
+| FE-4-4 | 시퀀스 리뷰 화면 | `front/app/(instructor)/review.tsx` | 인라인 세트/횟수 수정, 운동 삭제, 운동 추가 모달 |
+| FE-4-5 | 회원 편집 화면 보강 | `front/app/(instructor)/member-form.tsx` | 산전/산후 토글, 타겟 근육 태그, avoidExercises |
 
 ### 체크포인트 ✅
 ```
-□ 강사: 대시보드에서 오늘 세션 현황 확인 (스케줄 기반)
-□ 강사: 컨디션 체크 완료/미완료 회원 구분 확인
-□ 강사: 회원 메모 ("어깨 뻐근") 대시보드에서 확인
-□ 강사: 시퀀스 카드 탭 → 리뷰 화면 진입
-□ 강사: 운동 순서 드래그 변경 → 저장 → 반영
-□ 강사: 운동 추가 (카탈로그 검색) → 저장
-□ 강사: 운동 삭제 → 저장
-□ 강사: 세트/횟수/시간 수정 → 저장
-□ 수정된 시퀀스가 회원 앱에 즉시 반영 확인
+✅ 강사: 대시보드에서 오늘 세션 현황 확인 (통계 카드 + 세션 목록)
+✅ 강사: 컨디션 체크 완료/미완료 회원 구분 확인
+✅ 강사: 회원 메모 대시보드에서 확인
+✅ 강사: 시퀀스 카드 탭 → 리뷰 화면 진입
+✅ 강사: 인라인 세트/횟수 수정 → 저장
+✅ 강사: 운동 추가 (카탈로그 검색: 이름/한국어명) → 저장
+✅ 강사: 운동 삭제 → 자동 reorder → 저장
+✅ 수정된 시퀀스가 회원 앱에 즉시 반영 확인
+✅ 354개 운동, 22개 카테고리 카탈로그 확인
+✅ 산전/산후 회원 시퀀스 생성 정상 동작 확인
+✅ 회원 편집: 신체 상태, 타겟 근육, avoidExercises, 세션 시간 편집 확인
 ```
 
 ---

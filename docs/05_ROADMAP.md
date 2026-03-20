@@ -5,6 +5,7 @@
 ```
 Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 ──→ Phase 6
 스캐폴딩    인증+프로필  스케줄+컨디션  시퀀스생성   강사리뷰    회원뷰+자동화  폴리싱
+ ✅완료      ✅완료      ✅완료       ✅완료       ✅완료      미착수        미착수
 ```
 
 ---
@@ -110,7 +111,7 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 | # | 작업 | 상세 | 상태 |
 |---|---|---|---|
 | 3-1 | sessions, exerciseSequences 스키마 | Drizzle 스키마 + 마이그레이션 | ✅ |
-| 3-2 | exerciseCatalog 스키마 + 시드 데이터 | 기본 운동 50개+ | ✅ |
+| 3-2 | exerciseCatalog 스키마 + 시드 데이터 | 기본 운동 50개+ (Phase 4에서 354개로 확장) | ✅ |
 | 3-3 | Claude Text API 서비스 | sequence-generator.ts에 통합 | ✅ |
 | 3-4 | 시퀀스 생성 서비스 | sequence-generator.ts (확장 컨디션 항목 반영 프롬프트) | ✅ |
 | 3-5 | CategorySelector 컴포넌트 | 추가 운동 카테고리 선택 (최대 2개) | ✅ |
@@ -148,23 +149,33 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 
 ---
 
-## Phase 4: 강사 리뷰 + 대시보드
+## Phase 4: 강사 리뷰 + 대시보드 + 운동 카탈로그 확장 + 산전/산후 ✅ 완료
 
 ### 작업 항목
 
-| # | 작업 | 상세 |
-|---|---|---|
-| 4-1 | 대시보드 화면 (강사) | 오늘 세션 현황 (스케줄 기반), 컨디션/시퀀스 상태, 회원 메모 표시 |
-| 4-2 | SessionStatusCard 컴포넌트 | 세션별 상태 카드 |
-| 4-3 | SequenceEditor 컴포넌트 | 드래그 앤 드롭 편집 |
-| 4-4 | 운동 상세 모달, 추가/삭제/수정 | 카탈로그 검색 + 인라인 편집 |
-| 4-5 | 시퀀스 수정 API 연동 | PUT /sequences/:id |
-| 4-6 | 저장 완료 피드백 | 토스트 + 대시보드 복귀 |
+| # | 작업 | 상세 | 상태 |
+|---|---|---|---|
+| 4-1 | 대시보드 화면 (강사) | 오늘 세션 현황 (통계 카드 + 세션 목록) | ✅ |
+| 4-2 | SessionStatusCard 컴포넌트 | 상태 뱃지 (대기중/컨디션완료/시퀀스완료/수정됨) | ✅ |
+| 4-3 | 시퀀스 리뷰/편집 | 인라인 세트/횟수 수정, 운동 삭제, 운동 추가 모달 | ✅ |
+| 4-4 | 카탈로그 검색 API | 이름/한국어명 검색 | ✅ |
+| 4-5 | PUT /api/sequences/:id | 시퀀스 수정, wasModified 플래그 | ✅ |
+| 4-6 | DELETE /api/sequences/:id/exercises/:order | 운동 삭제 + reorder | ✅ |
+| 4-7 | 운동 카탈로그 확장 | 50개 → 230개 → 354개, 9개 → 22개 카테고리 | ✅ |
+| 4-8 | 산전/산후 지원 | isPrenatal/isPostnatal 플래그, 시퀀스 생성 반영 | ✅ |
+| 4-9 | 회원 프로필 편집 (강사) | 신체 상태 추가/삭제, 타겟 근육, avoidExercises, 세션 시간 | ✅ |
+| 4-10 | 시퀀스 생성기 버그 수정 | bodyConditions/conditionFinal 다형 처리, targetMuscles 우선 선택 | ✅ |
+
+### Sprint 4 이후 추가 카테고리
+rehabilitation, prenatal, postnatal, cardio_endurance, coordination, relaxation_recovery, spine_mobility, hip_pelvis, foot_ankle, functional, full_body, lateral_movement, pelvic_floor
 
 ### 완료 기준
-- 대시보드에서 스케줄 기반 오늘 세션 현황 확인
-- 회원 메모 + 컨디션 요약 강사 뷰에서 확인
-- 시퀀스 수정 → 저장 → 회원 앱 반영
+- ✅ 대시보드에서 스케줄 기반 오늘 세션 현황 확인
+- ✅ 회원 메모 + 컨디션 요약 강사 뷰에서 확인
+- ✅ 시퀀스 수정 → 저장 → 회원 앱 반영
+- ✅ 운동 추가 모달 (카탈로그 검색)
+- ✅ 산전/산후 회원 시퀀스 생성 정상 동작
+- ✅ 354개 운동, 22개 카테고리 카탈로그
 
 ### 의존성
 - Phase 3 완료

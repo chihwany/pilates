@@ -236,7 +236,7 @@ pilates/
 │   │   │   └── exercises.ts           # 운동 카탈로그
 │   │   ├── services/
 │   │   │   ├── claude-vision.ts       # Claude Vision API (@anthropic-ai/sdk, tool_use 패턴, mock fallback)
-│   │   │   ├── sequence-generator.ts  # 프롬프트 구성 + Claude Text API 시퀀스 생성 (50분 수업 기준)
+│   │   │   ├── sequence-generator.ts  # 프롬프트 구성 + Claude Text API 시퀀스 생성 (회원별 세션 시간, 산전/산후, 타겟 근육, avoidExercises 반영)
 │   │   │   └── push-notification.ts   # Push 알림 발송 서비스
 │   │   ├── jobs/
 │   │   │   ├── condition-reminder.ts  # 12시 컨디션 체크 리마인더
@@ -448,6 +448,12 @@ pilates/
 9. 회원이 추가로 요청한 운동 카테고리가 있다면 우선적으로 반영하세요.
 10. 컨디션 정보가 없는 경우, 프로필과 운동 이력만으로 균형 잡힌 시퀀스를 구성하세요.
 11. 회원이 남긴 추가 메모(통증 부위 등)를 반드시 고려하세요.
+12. 산전(isPrenatal) 회원은 prenatal 카테고리 운동을 자동 포함하고, 고강도 운동을 제외하세요.
+13. 산전이 아닌 회원은 prenatal 카테고리 운동을 제외하세요.
+14. 산후(isPostnatal) 회원은 postnatal 카테고리 운동을 우선 포함하세요.
+15. 타겟 근육(targetMuscles)이 지정된 경우 해당 근육 그룹 운동을 우선 선택하세요.
+16. 피해야 할 운동(avoidExercises) 목록의 운동은 절대 포함하지 마세요.
+17. 회원별 세션 시간(sessionDurationMinutes)에 맞게 운동 수를 조절하세요.
 
 출력은 반드시 지정된 JSON 스키마를 따르세요.
 ```
@@ -458,8 +464,11 @@ pilates/
 - 이름: {name}
 - 피트니스 레벨: {fitnessLevel}
 - 신체 상태: {bodyConditions 목록}
+- 산전/산후: {isPrenatal}, {isPostnatal}
+- 타겟 근육: {targetMuscles}
 - 운동 선호: 선호 기구 {equipment}, 목표 {goals}
 - 피해야 할 운동: {avoidExercises}
+- 세션 시간: {sessionDurationMinutes}분
 
 ## 오늘 컨디션
 {컨디션 있을 때}
@@ -495,7 +504,7 @@ pilates/
     {
       "order": 1,
       "name": "운동명",
-      "category": "warm-up|core|upper-body|lower-body|stretch|cool-down|full-body|breath",
+      "category": "warm_up|cool_down|core|upper_body|lower_body|flexibility|balance|breath|strength|posture|rehabilitation|prenatal|postnatal|cardio_endurance|coordination|relaxation_recovery|spine_mobility|hip_pelvis|foot_ankle|functional|full_body|lateral_movement|pelvic_floor",
       "equipment": "mat|reformer|chair|barrel|tower|ring|band|ball|roller|none",
       "durationSeconds": 60,
       "sets": 1,

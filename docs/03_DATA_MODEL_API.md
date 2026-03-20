@@ -32,11 +32,19 @@
 | exercisePreferences | jsonb | default: {} | 운동 선호도 |
 | fitnessLevel | enum | NOT NULL, default: 'beginner' | 'beginner' \| 'intermediate' \| 'advanced' |
 | notes | text | NULLABLE | 강사 메모 |
+| isPrenatal | boolean | default: false | 산전 여부 |
+| isPostnatal | boolean | default: false | 산후 여부 |
+| targetMuscles | jsonb | default: [] | 타겟 근육 그룹 배열 |
 | isActive | boolean | default: true | 활성 상태 |
 | createdAt | timestamp | default: now() | 등록일 |
 | updatedAt | timestamp | default: now() | 수정일 |
 
 > 얼굴 사진 등록 관련 필드 없음. 로그인 기반으로 사용자 식별.
+
+**targetMuscles 가능한 값:**
+```
+core, glutes, hamstrings, quadriceps, back, shoulders, arms, chest, hip_flexors, calves, inner_thighs
+```
 
 **bodyConditions JSONB 구조:**
 ```json
@@ -76,7 +84,8 @@ other            - 기타
   "preferredEquipment": ["reformer", "mat"],
   "avoidExercises": ["rolling_like_a_ball", "open_leg_rocker"],
   "goals": ["core_strength", "flexibility", "posture_correction"],
-  "sessionDurationMinutes": 50
+  "sessionDurationMinutes": 50,
+  "targetMuscles": ["core", "glutes", "back"]
 }
 ```
 
@@ -171,18 +180,32 @@ cancelled      - 취소
 ["core", "flexibility"]
 ```
 
-**추가 운동 카테고리 목록:**
+**운동 카테고리 목록 (22개):**
 | 기술명 | UI 표시명 |
 |---|---|
+| warm_up | 워밍업 |
+| cool_down | 쿨다운 |
 | core | 코어 집중 |
 | upper_body | 상체 강화 |
 | lower_body | 하체 강화 |
 | flexibility | 유연성 |
 | balance | 밸런스 |
-| stretch | 스트레칭 |
 | breath | 호흡/릴랙스 |
-| posture | 자세 교정 |
 | strength | 근력 강화 |
+| posture | 자세 교정 |
+| rehabilitation | 재활 |
+| prenatal | 산전 |
+| postnatal | 산후 |
+| cardio_endurance | 심폐 지구력 |
+| coordination | 협응력 |
+| relaxation_recovery | 이완/회복 |
+| spine_mobility | 척추 가동성 |
+| hip_pelvis | 고관절/골반 |
+| foot_ankle | 발/발목 |
+| functional | 기능적 움직임 |
+| full_body | 전신 |
+| lateral_movement | 측면 움직임 |
+| pelvic_floor | 골반저 |
 
 **인덱스:**
 - `memberId, date` (회원의 특정 날짜 세션 조회)
@@ -481,20 +504,22 @@ Response: 201
 ### 3.6 운동 시퀀스 (Sequences)
 
 `POST /api/sequences/generate` - 시퀀스 생성
-`PUT /api/sequences/:id` - 시퀀스 수정 (강사)
+`PUT /api/sequences/:id` - 시퀀스 수정 (강사, wasModified 플래그 자동 설정)
+`DELETE /api/sequences/:id/exercises/:order` - 운동 삭제 + 자동 reorder (강사)
 
 > **시퀀스 재생성 시 기존 삭제**: `POST /api/sequences/generate`에서 같은 세션의 기존 시퀀스가 있으면 삭제 후 새로 생성. 오늘 탭에서 항상 최신 시퀀스만 표시.
 
-> **50분 수업 기준**: 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분) = 총 50분. 세트 간 휴식 15초 포함, 동적 운동 수 조절.
+> **회원별 세션 시간 기준**: 기본 50분 (회원 프로필 sessionDurationMinutes로 조절). 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분). 세트 간 휴식 15초 포함, 동적 운동 수 조절.
+
+> **산전/산후 반영**: 산전 회원은 prenatal 운동 자동 포함 + 고강도 제외, 산전 미체크 회원은 prenatal 자동 제외. 타겟 근육/avoidExercises 필터링 적용.
 
 ---
 
 ### 3.7 운동 카탈로그 (Exercises)
 
-`GET /api/exercises` - 카탈로그 조회
+`GET /api/exercises` - 카탈로그 조회 (354개 운동, 22개 카테고리)
+`GET /api/exercises?search=키워드` - 카탈로그 검색 (이름/한국어명 검색)
 `POST /api/exercises` - 커스텀 운동 추가 (강사 전용)
-
-(기존과 동일)
 
 ---
 
