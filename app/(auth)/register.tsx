@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { register as registerApi } from "@/lib/api/auth";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useState } from "react";
@@ -24,21 +25,6 @@ const registerSchema = z
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-// Mock 회원가입 (BE 개발 전)
-const mockRegister = async (name: string, email: string, role: UserRole) => {
-  return {
-    user: {
-      id: "mock-user-" + Date.now(),
-      email,
-      name,
-      role,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    accessToken: "mock-access-token",
-    refreshToken: "mock-refresh-token",
-  };
-};
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -58,16 +44,33 @@ export default function RegisterScreen() {
   const onSubmit = async (data: RegisterForm) => {
     setLoading(true);
     try {
-      const result = await mockRegister(data.name, data.email, role);
-      await setAuth(result.user, result.accessToken, result.refreshToken);
+      const result = await registerApi({
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        role,
+      });
 
-      if (result.user.role === "instructor") {
-        router.replace("/(instructor)");
+      if (!result.success || !result.data) {
+        const msg = result.error?.message || "잠시 후 다시 시도해주세요.";
+        if (Platform.OS === "web") {
+          window.alert(`회원가입 실패: ${msg}`);
+        } else {
+          Alert.alert("회원가입 실패", msg);
+        }
+        return;
+      }
+
+      if (Platform.OS === "web") {
+        window.alert("가입이 완료되었습니다. 로그인해주세요.");
+        router.replace("/(auth)/login");
       } else {
-        router.replace("/(member)");
+        Alert.alert("회원가입 성공", "가입이 완료되었습니다. 로그인해주세요.", [
+          { text: "확인", onPress: () => router.replace("/(auth)/login") },
+        ]);
       }
     } catch {
-      Alert.alert("회원가입 실패", "잠시 후 다시 시도해주세요.");
+      Alert.alert("회원가입 실패", "네트워크 오류. 잠시 후 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -193,12 +196,6 @@ export default function RegisterScreen() {
               />
             )}
           />
-
-          <View className="bg-blue-50 rounded-xl p-4 mb-6">
-            <Text className="text-sm text-blue-700 text-center">
-              얼굴 사진 등록은 불필요합니다. 이메일과 비밀번호만으로 가입할 수 있습니다.
-            </Text>
-          </View>
 
           <Button
             title="회원가입"

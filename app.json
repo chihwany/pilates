@@ -25,7 +25,7 @@
       "package": "com.pilatesai.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./public/favicon.ico",
       "bundler": "metro"
     },
     "plugins": [
