@@ -133,11 +133,32 @@ export function generateSequence(
     (ex) => difficultyOrder.indexOf(ex.difficulty) <= maxDifficultyIdx
   );
 
-  // 4. 카테고리 기반 선택
+  // 4. exercisePreferences 기반 필터링
+  const prefs = (member.exercisePreferences || {}) as {
+    targetMuscles?: string[];
+    avoidExercises?: string[];
+    goals?: string[];
+    sessionDurationMinutes?: number;
+  };
+
+  // 4.1 avoidExercises에 포함된 운동 제외
+  if (prefs.avoidExercises && prefs.avoidExercises.length > 0) {
+    const avoidSet = new Set(prefs.avoidExercises.map((n) => n.toLowerCase()));
+    available = available.filter(
+      (ex) =>
+        !avoidSet.has(ex.name.toLowerCase()) &&
+        !avoidSet.has(ex.nameKo.toLowerCase())
+    );
+  }
+
+  // 4.2 sessionDurationMinutes 반영
+  const sessionDurationMinutes = prefs.sessionDurationMinutes ?? 50;
+
+  // 4.3 카테고리 기반 선택
   const requestedSet = new Set(requestedCategories);
 
-  // 목표 수업 시간: 50분 (3000초)
-  const TARGET_DURATION_SECONDS = 50 * 60;
+  // 목표 수업 시간
+  const TARGET_DURATION_SECONDS = sessionDurationMinutes * 60;
   const REST_BETWEEN_SETS_SECONDS = 15; // 세트 간 휴식
 
   // 워밍업 운동 선택 (3개, ~7분)
@@ -179,6 +200,18 @@ export function generateSequence(
     mainCandidates = shuffleArray(mainPool);
   }
 
+  // 4.5 타겟 근육 기반 우선순위
+  const targetMuscles = prefs.targetMuscles;
+  if (targetMuscles && targetMuscles.length > 0) {
+    const targetSet = new Set(targetMuscles.map((m) => m.toLowerCase()));
+    const hasTargetMuscle = (ex: CatalogExercise) =>
+      (ex.muscleGroups || []).some((mg) => targetSet.has(mg.toLowerCase()));
+
+    const musclePreferred = mainCandidates.filter(hasTargetMuscle);
+    const muscleOthers = mainCandidates.filter((ex) => !hasTargetMuscle(ex));
+    mainCandidates = [...musclePreferred, ...muscleOthers];
+  }
+
   // 워밍업+쿨다운 시간 계산
   const warmupCooldownSeconds = [...warmups, ...cooldowns].reduce(
     (sum, ex) => sum + (ex.durationSeconds || 60) * 2, 0
@@ -218,6 +251,15 @@ export function generateSequence(
   const allExercises = [...warmups, ...mainExercises, ...cooldowns];
   const focusAreas = [...new Set(allExercises.map((ex) => ex.category))];
 
+  // 타겟 근육이 있으면 focusAreas에 추가
+  if (targetMuscles && targetMuscles.length > 0) {
+    for (const muscle of targetMuscles) {
+      if (!focusAreas.includes(muscle)) {
+        focusAreas.push(muscle);
+      }
+    }
+  }
+
   const setsMap: Record<string, number> = {
     beginner: 2,
     intermediate: 3,
@@ -241,11 +283,28 @@ export function generateSequence(
   const exercises: SequenceExercise[] = allExercises.map((ex, idx) => {
     const sets = getExSets(ex, idx);
     const diff = ex.difficulty || targetDifficulty;
+    const isTargetMuscleMatch =
+      targetMuscles &&
+      targetMuscles.length > 0 &&
+      (ex.muscleGroups || []).some((mg) =>
+        targetMuscles.some((tm) => tm.toLowerCase() === mg.toLowerCase())
+      );
+
     let reason: string;
     if (idx < warmups.length) {
       reason = "워밍업: 몸을 부드럽게 풀어주는 운동";
     } else if (idx >= warmups.length + mainExercises.length) {
       reason = "쿨다운: 몸의 긴장을 풀어주는 마무리 운동";
+    } else if (isTargetMuscleMatch && requestedSet.has(ex.category)) {
+      const matchedMuscles = (ex.muscleGroups || []).filter((mg) =>
+        targetMuscles!.some((tm) => tm.toLowerCase() === mg.toLowerCase())
+      );
+      reason = `요청된 카테고리(${ex.category}) + 타겟 근육(${matchedMuscles.join(", ")}) 운동`;
+    } else if (isTargetMuscleMatch) {
+      const matchedMuscles = (ex.muscleGroups || []).filter((mg) =>
+        targetMuscles!.some((tm) => tm.toLowerCase() === mg.toLowerCase())
+      );
+      reason = `타겟 근육(${matchedMuscles.join(", ")}) 강화 운동`;
     } else if (requestedSet.has(ex.category)) {
       reason = `요청된 카테고리(${ex.category}) 운동`;
     } else {
@@ -283,12 +342,24 @@ export function generateSequence(
     moodNote = " 좋은 기분을 유지하며 활기찬 운동을 구성했습니다.";
   }
 
+  // 타겟 근육 메모
+  let targetMuscleNote = "";
+  if (targetMuscles && targetMuscles.length > 0) {
+    targetMuscleNote = ` 타겟 근육(${targetMuscles.join(", ")})을 중심으로 운동을 우선 배치했습니다.`;
+  }
+
+  // 목표 메모
+  let goalsNote = "";
+  if (prefs.goals && prefs.goals.length > 0) {
+    goalsNote = ` 목표: ${prefs.goals.join(", ")}.`;
+  }
+
   return {
     exercises,
     totalDurationMinutes,
     difficulty: targetDifficulty,
     focusAreas,
-    sequenceNote: intensityNote + moodNote,
+    sequenceNote: intensityNote + moodNote + targetMuscleNote + goalsNote,
   };
 }
 

@@ -73,6 +73,7 @@ export interface BodyCondition {
 
 export interface ExercisePreferences {
   preferredEquipment: string[];
+  targetMuscles: string[];
   avoidExercises: string[];
   goals: string[];
   sessionDurationMinutes: number;

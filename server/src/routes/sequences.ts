@@ -153,7 +153,7 @@ sequencesRouter.post("/generate", async (c) => {
       totalDurationMinutes: generated.totalDurationMinutes,
       difficulty: generated.difficulty,
       focusAreas: generated.focusAreas,
-      aiPromptUsed: `energy=${(conditionFinal as any)?.energy ?? "N/A"}, stress=${(conditionFinal as any)?.stress ?? "N/A"}, categories=${requestedCategories.join(",")}`,
+      aiPromptUsed: `energy=${(conditionFinal as any)?.energy ?? "N/A"}, stress=${(conditionFinal as any)?.stress ?? "N/A"}, categories=${requestedCategories.join(",")}, targetMuscles=${((memberProfile.exercisePreferences as any)?.targetMuscles || []).join(",") || "N/A"}`,
     })
     .returning();
 
