@@ -28,11 +28,11 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 ### FE 작업
 | # | 작업 | 파일 |
 |---|---|---|
-| FE-0-1 | Expo 프로젝트 초기화 (expo-router) | `package.json`, `app.json` |
-| FE-0-2 | NativeWind v4 설정 | `tailwind.config.js`, `babel.config.js`, `metro.config.js`, `global.css` |
-| FE-0-3 | 디렉토리 구조 생성 | `app/`, `components/`, `lib/` |
-| FE-0-4 | 공유 타입 정의 | `shared/types.ts` |
-| FE-0-5 | API 클라이언트 기초 | `lib/api/client.ts` |
+| FE-0-1 | Expo 프로젝트 초기화 (expo-router) | `front/package.json`, `front/app.json` |
+| FE-0-2 | NativeWind v4 설정 | `front/tailwind.config.js`, `front/babel.config.js`, `front/metro.config.js`, `front/global.css` |
+| FE-0-3 | 디렉토리 구조 생성 | `front/app/`, `front/components/`, `front/lib/` |
+| FE-0-4 | 공유 타입 정의 | `front/front/shared/types.ts` |
+| FE-0-5 | API 클라이언트 기초 | `front/lib/api/client.ts` |
 | FE-0-6 | `.env` 설정 | `EXPO_PUBLIC_API_URL` |
 
 ### 체크포인트 ✅
@@ -59,22 +59,22 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 | BE-1-5 | 인증 API | `server/src/routes/auth.ts` | register, login, refresh, me, push-token |
 | BE-1-6 | 인증 미들웨어 | `server/src/middleware/auth.ts` | authMiddleware, requireRole |
 | BE-1-7 | 회원 CRUD API | `server/src/routes/members.ts` | GET/POST/PUT/DELETE |
-| BE-1-8 | Zod 검증 스키마 | `shared/validation.ts` | 프론트/백 공유 |
+| BE-1-8 | Zod 검증 스키마 | `front/shared/validation.ts` | 프론트/백 공유 |
 
 ### FE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-1-1 | AuthProvider + Zustand | `lib/stores/authStore.ts` | 토큰 저장 (expo-secure-store) |
-| FE-1-2 | 루트 레이아웃 | `app/_layout.tsx` | 인증 체크 → 역할별 리다이렉트 |
-| FE-1-3 | 로그인 화면 | `app/(auth)/login.tsx` | 이메일/비밀번호 폼 |
-| FE-1-4 | 회원가입 화면 | `app/(auth)/register.tsx` | 기본정보 + 역할선택 |
-| FE-1-5 | 강사 탭 레이아웃 | `app/(instructor)/_layout.tsx` | 5탭 (홈/회원/스케줄/세션/설정) |
-| FE-1-6 | 회원 탭 레이아웃 | `app/(member)/_layout.tsx` | 4탭 (오늘/컨디션/기록/프로필) |
-| FE-1-7 | 회원 목록 화면 (강사) | `app/(instructor)/members/index.tsx` | 검색 + 목록 |
-| FE-1-8 | 회원 등록/편집 폼 | `app/(instructor)/member-form.tsx` | RHF + Zod |
-| FE-1-9 | 회원 상세 화면 (강사) | `app/(instructor)/members/[id].tsx` | 프로필 표시 |
-| FE-1-10 | 프로필 화면 (회원) | `app/(member)/profile.tsx` | 내 정보 조회/편집 |
-| FE-1-11 | UI 기본 컴포넌트 | `components/ui/` | Button, Card, Input, Badge, LoadingSpinner |
+| FE-1-1 | AuthProvider + Zustand | `front/lib/stores/authStore.ts` | 토큰 저장 (expo-secure-store) |
+| FE-1-2 | 루트 레이아웃 | `front/app/_layout.tsx` | 인증 체크 → 역할별 리다이렉트 |
+| FE-1-3 | 로그인 화면 | `front/app/(auth)/login.tsx` | 이메일/비밀번호 폼 |
+| FE-1-4 | 회원가입 화면 | `front/app/(auth)/register.tsx` | 기본정보 + 역할선택 |
+| FE-1-5 | 강사 탭 레이아웃 | `front/app/(instructor)/_layout.tsx` | 5탭 (홈/회원/스케줄/세션/설정) |
+| FE-1-6 | 회원 탭 레이아웃 | `front/app/(member)/_layout.tsx` | 4탭 (오늘/컨디션/기록/프로필) |
+| FE-1-7 | 회원 목록 화면 (강사) | `front/app/(instructor)/members/index.tsx` | 검색 + 목록 |
+| FE-1-8 | 회원 등록/편집 폼 | `front/app/(instructor)/member-form.tsx` | RHF + Zod |
+| FE-1-9 | 회원 상세 화면 (강사) | `front/app/(instructor)/members/[id].tsx` | 프로필 표시 |
+| FE-1-10 | 프로필 화면 (회원) | `front/app/(member)/profile.tsx` | 내 정보 조회/편집 |
+| FE-1-11 | UI 기본 컴포넌트 | `front/components/ui/` | Button, Card, Input, Badge, LoadingSpinner |
 
 ### 체크포인트 ✅
 ```
@@ -107,21 +107,21 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 ### FE 작업 - 스케줄 (강사)
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-2-1 | 주간 스케줄 화면 | `app/(instructor)/schedule.tsx` | 요일 탭 + 시간 목록 |
-| FE-2-2 | WeeklySchedule 컴포넌트 | `components/schedule/WeeklySchedule.tsx` | 요일별 뷰 |
-| FE-2-3 | ScheduleEditor 컴포넌트 | `components/schedule/ScheduleEditor.tsx` | 등록/편집 모달 |
-| FE-2-4 | 스케줄 API 훅 | `lib/hooks/useSchedule.ts` | TanStack Query |
+| FE-2-1 | 주간 스케줄 화면 | `front/app/(instructor)/schedule.tsx` | 요일 탭 + 시간 목록 |
+| FE-2-2 | WeeklySchedule 컴포넌트 | `front/components/schedule/WeeklySchedule.tsx` | 요일별 뷰 |
+| FE-2-3 | ScheduleEditor 컴포넌트 | `front/components/schedule/ScheduleEditor.tsx` | 등록/편집 모달 |
+| FE-2-4 | 스케줄 API 훅 | `front/lib/hooks/useSchedule.ts` | TanStack Query |
 
 ### FE 작업 - 컨디션 체크 (회원)
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-2-5 | FaceCapture 컴포넌트 | `components/camera/FaceCapture.tsx` | expo-camera + base64 |
-| FE-2-6 | ConditionResult 컴포넌트 | `components/condition/ConditionResult.tsx` | AI 결과 표시 |
-| FE-2-7 | ConditionEditor 컴포넌트 | `components/condition/ConditionEditor.tsx` | 슬라이더/선택지 수정 |
-| FE-2-8 | ConditionBadge 컴포넌트 | `components/condition/ConditionBadge.tsx` | 에너지/무드/수면 뱃지 |
-| FE-2-9 | Slider 컴포넌트 | `components/ui/Slider.tsx` | 커스텀 슬라이더 |
-| FE-2-10 | 컨디션 체크 화면 | `app/(member)/condition-check.tsx` | 카메라→분석→수정→등록 |
-| FE-2-11 | 컨디션 API 훅 | `lib/hooks/useCondition.ts` | TanStack Query |
+| FE-2-5 | FaceCapture 컴포넌트 | `front/components/camera/FaceCapture.tsx` | expo-camera + base64 |
+| FE-2-6 | ConditionResult 컴포넌트 | `front/components/condition/ConditionResult.tsx` | AI 결과 표시 |
+| FE-2-7 | ConditionEditor 컴포넌트 | `front/components/condition/ConditionEditor.tsx` | 슬라이더/선택지 수정 |
+| FE-2-8 | ConditionBadge 컴포넌트 | `front/components/condition/ConditionBadge.tsx` | 에너지/무드/수면 뱃지 |
+| FE-2-9 | Slider 컴포넌트 | `front/components/ui/Slider.tsx` | 커스텀 슬라이더 |
+| FE-2-10 | 컨디션 체크 화면 | `front/app/(member)/condition-check.tsx` | 카메라→분석→수정→등록 |
+| FE-2-11 | 컨디션 API 훅 | `front/lib/hooks/useCondition.ts` | TanStack Query |
 
 ### 체크포인트 ✅
 ```
@@ -156,13 +156,13 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 ### FE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-3-1 | CategorySelector 컴포넌트 | `components/exercise/CategorySelector.tsx` | 운동 카테고리 선택 (최대 2개) |
-| FE-3-2 | 컨디션 등록 → 카테고리 → 시퀀스 생성 연결 | `app/(member)/condition-check.tsx` 수정 | 전체 플로우 연결 |
-| FE-3-3 | 오늘의 시퀀스 화면 | `app/(member)/today.tsx` | 시퀀스 표시 + 미배정 상태 |
-| FE-3-4 | SequenceCard 컴포넌트 | `components/exercise/SequenceCard.tsx` | 시퀀스 요약 카드 |
-| FE-3-5 | ExerciseItem 컴포넌트 | `components/exercise/ExerciseItem.tsx` | 개별 운동 카드 |
-| FE-3-6 | 운동 상세 모달 | `app/(member)/exercise-detail.tsx` | 설명, 수정사항, 이유 |
-| FE-3-7 | 시퀀스 API 훅 | `lib/hooks/useSequence.ts` | TanStack Query |
+| FE-3-1 | CategorySelector 컴포넌트 | `front/components/exercise/CategorySelector.tsx` | 운동 카테고리 선택 (최대 2개) |
+| FE-3-2 | 컨디션 등록 → 카테고리 → 시퀀스 생성 연결 | `front/app/(member)/condition-check.tsx` 수정 | 전체 플로우 연결 |
+| FE-3-3 | 오늘의 시퀀스 화면 | `front/app/(member)/today.tsx` | 시퀀스 표시 + 미배정 상태 |
+| FE-3-4 | SequenceCard 컴포넌트 | `front/components/exercise/SequenceCard.tsx` | 시퀀스 요약 카드 |
+| FE-3-5 | ExerciseItem 컴포넌트 | `front/components/exercise/ExerciseItem.tsx` | 개별 운동 카드 |
+| FE-3-6 | 운동 상세 모달 | `front/app/(member)/exercise-detail.tsx` | 설명, 수정사항, 이유 |
+| FE-3-7 | 시퀀스 API 훅 | `front/lib/hooks/useSequence.ts` | TanStack Query |
 | FE-3-8 | 시퀀스 생성 로딩 UI | 프로그레스 바 / 스피너 | 10초 대기 UX |
 
 ### 체크포인트 ✅ (핵심 E2E)
@@ -194,11 +194,11 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 ### FE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-4-1 | 대시보드 화면 | `app/(instructor)/dashboard.tsx` | 오늘 현황 요약 + 세션 목록 |
-| FE-4-2 | SessionStatusCard | `components/dashboard/SessionStatusCard.tsx` | 생성완료/미체크/자동생성 상태 |
-| FE-4-3 | ConditionSummary | `components/dashboard/ConditionSummary.tsx` | 체크 현황 요약 |
-| FE-4-4 | 시퀀스 리뷰 화면 | `app/(instructor)/review.tsx` | 운동 목록 + 컨디션 정보 |
-| FE-4-5 | SequenceEditor | `components/exercise/SequenceEditor.tsx` | 드래그앤드롭 순서 변경 |
+| FE-4-1 | 대시보드 화면 | `front/app/(instructor)/dashboard.tsx` | 오늘 현황 요약 + 세션 목록 |
+| FE-4-2 | SessionStatusCard | `front/components/dashboard/SessionStatusCard.tsx` | 생성완료/미체크/자동생성 상태 |
+| FE-4-3 | ConditionSummary | `front/components/dashboard/ConditionSummary.tsx` | 체크 현황 요약 |
+| FE-4-4 | 시퀀스 리뷰 화면 | `front/app/(instructor)/review.tsx` | 운동 목록 + 컨디션 정보 |
+| FE-4-5 | SequenceEditor | `front/components/exercise/SequenceEditor.tsx` | 드래그앤드롭 순서 변경 |
 | FE-4-6 | 운동 추가 모달 | 카탈로그 검색 → 선택 → 추가 | |
 | FE-4-7 | 운동 인라인 편집 | 세트/횟수/시간 수정 | |
 
@@ -234,13 +234,13 @@ Sprint 0 ──→ Sprint 1 ──→ Sprint 2 ──→ Sprint 3 ──→ Spri
 ### FE 작업
 | # | 작업 | 파일 | 상세 |
 |---|---|---|---|
-| FE-5-1 | Push 알림 설정 | `lib/hooks/useNotifications.ts` | 토큰 등록, 알림 수신 |
+| FE-5-1 | Push 알림 설정 | `front/lib/hooks/useNotifications.ts` | 토큰 등록, 알림 수신 |
 | FE-5-2 | 알림 탭 응답 처리 | 알림 탭 → 해당 화면 이동 | |
-| FE-5-3 | 컨디션 마감 화면 | `app/(member)/condition-check.tsx` 수정 | 1시 이후 마감 안내 |
-| FE-5-4 | 자동 생성 뱃지 | `components/exercise/` 수정 | isAutoGenerated 표시 |
-| FE-5-5 | 히스토리 화면 (회원) | `app/(member)/history.tsx` | 날짜별 과거 세션 |
-| FE-5-6 | 세션 히스토리 (강사) | `app/(instructor)/sessions.tsx` | 전체 세션 목록 + 필터 |
-| FE-5-7 | 운동 상세 화면 보완 | `app/(member)/exercise-detail.tsx` | 설명, 수정사항 표시 |
+| FE-5-3 | 컨디션 마감 화면 | `front/app/(member)/condition-check.tsx` 수정 | 1시 이후 마감 안내 |
+| FE-5-4 | 자동 생성 뱃지 | `front/components/exercise/` 수정 | isAutoGenerated 표시 |
+| FE-5-5 | 히스토리 화면 (회원) | `front/app/(member)/history.tsx` | 날짜별 과거 세션 |
+| FE-5-6 | 세션 히스토리 (강사) | `front/app/(instructor)/sessions.tsx` | 전체 세션 목록 + 필터 |
+| FE-5-7 | 운동 상세 화면 보완 | `front/app/(member)/exercise-detail.tsx` | 설명, 수정사항 표시 |
 
 ### 체크포인트 ✅
 ```
@@ -350,7 +350,7 @@ main ← 안정 버전
 4. 발견된 이슈는 다음 Sprint 시작 시 우선 수정
 
 ### FE/BE 연동 규칙
-- API 엔드포인트는 `shared/types.ts`의 타입을 공유
+- API 엔드포인트는 `front/shared/types.ts`의 타입을 공유
 - BE API 완성 전 FE는 mock 데이터로 UI 개발 가능
 - BE API 완성 후 mock → 실제 API로 교체
 - 연동 테스트는 체크포인트에서 일괄 수행

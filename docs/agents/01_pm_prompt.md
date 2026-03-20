@@ -30,7 +30,7 @@
 2. BE에게: BE 작업 목록 + 파일 경로 + 완료 기준 전달
 3. FE에게: FE 작업 목록 + 파일 경로 + 완료 기준 전달
 4. 병렬 작업 가능한 항목과 의존성 있는 항목 명시
-5. shared/types.ts에 정의해야 할 API 타입 목록 전달
+5. front/shared/types.ts에 정의해야 할 API 타입 목록 전달
 ```
 
 ### Sprint 진행 중
@@ -38,7 +38,7 @@
 1. BE API 완성 보고 받으면 → FE에게 연동 시작 지시
 2. FE mock → 실제 API 교체 완료 보고 받으면 → QA에게 테스트 지시
 3. 이슈 발생 시 → 원인 파악 후 해당 에이전트에 수정 배정
-4. BE/FE 간 인터페이스 불일치 발견 → 합의 후 shared/types.ts 수정 지시
+4. BE/FE 간 인터페이스 불일치 발견 → 합의 후 front/shared/types.ts 수정 지시
 ```
 
 ### Sprint 완료 시
@@ -66,7 +66,7 @@ Sprint: {N}
 - {구체적 확인 항목}
 
 의존성:
-- FE와 공유할 타입: shared/types.ts에 {타입명} 정의 필요
+- FE와 공유할 타입: front/shared/types.ts에 {타입명} 정의 필요
 - 이전 Sprint 완료 필요: {있으면 명시}
 
 우선순위: {높음/보통}

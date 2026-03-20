@@ -1,10 +1,37 @@
 import { create } from "zustand";
-import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import type { User } from "@/shared/types";
 
 const ACCESS_TOKEN_KEY = "auth_access_token";
 const REFRESH_TOKEN_KEY = "auth_refresh_token";
 const USER_KEY = "auth_user";
+
+// 웹/네이티브 호환 스토리지
+const storage = {
+  async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === "web") {
+      return localStorage.getItem(key);
+    }
+    const SecureStore = await import("expo-secure-store");
+    return SecureStore.getItemAsync(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === "web") {
+      localStorage.setItem(key, value);
+      return;
+    }
+    const SecureStore = await import("expo-secure-store");
+    await SecureStore.setItemAsync(key, value);
+  },
+  async deleteItem(key: string): Promise<void> {
+    if (Platform.OS === "web") {
+      localStorage.removeItem(key);
+      return;
+    }
+    const SecureStore = await import("expo-secure-store");
+    await SecureStore.deleteItemAsync(key);
+  },
+};
 
 interface AuthState {
   token: string | null;
@@ -25,9 +52,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
 
   setAuth: async (user, accessToken, refreshToken) => {
-    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+    await storage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    await storage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    await storage.setItem(USER_KEY, JSON.stringify(user));
     set({
       token: accessToken,
       refreshToken,
@@ -38,9 +65,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(USER_KEY);
+    await storage.deleteItem(ACCESS_TOKEN_KEY);
+    await storage.deleteItem(REFRESH_TOKEN_KEY);
+    await storage.deleteItem(USER_KEY);
     set({
       token: null,
       refreshToken: null,
@@ -52,9 +79,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loadToken: async () => {
     try {
-      const token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
-      const userStr = await SecureStore.getItemAsync(USER_KEY);
+      const token = await storage.getItem(ACCESS_TOKEN_KEY);
+      const refreshToken = await storage.getItem(REFRESH_TOKEN_KEY);
+      const userStr = await storage.getItem(USER_KEY);
 
       if (token && userStr) {
         const user = JSON.parse(userStr) as User;

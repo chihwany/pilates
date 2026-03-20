@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Platform, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type {
   ConditionAnalysisDetailed,
@@ -11,55 +11,49 @@ import { ConditionResult } from "@/components/condition/ConditionResult";
 import { ConditionEditor } from "@/components/condition/ConditionEditor";
 import { CategorySelector } from "@/components/exercise/CategorySelector";
 import Button from "@/components/ui/Button";
+import { analyzeCondition, registerCondition } from "@/lib/api/condition";
 
-// ===== Mock AI Analysis =====
-
-const MOCK_ANALYSIS: ConditionAnalysisDetailed = {
-  energy: { level: 6, confidence: 0.82 },
-  mood: { value: "CALM", confidence: 0.75 },
-  stress: { level: 4, confidence: 0.7 },
-  sleep: { quality: "FAIR", confidence: 0.68 },
-  facialTension: {
-    forehead: { level: 2, confidence: 0.6 },
-    jaw: { level: 5, confidence: 0.72 },
-    asymmetry: { value: "MILD_LEFT", confidence: 0.55 },
-  },
-  swelling: { level: "MILD", confidence: 0.63 },
-  summary:
-    "전반적으로 안정적인 컨디션입니다. 약간의 턱 긴장이 감지되며, 수면 상태는 보통 수준입니다. 중간 강도의 운동이 적합해 보입니다.",
-  exerciseNote:
-    "턱 긴장 완화를 위한 목/어깨 스트레칭을 시퀀스에 포함하는 것을 권장합니다.",
+const showAlert = (title: string, msg: string) => {
+  if (Platform.OS === "web") window.alert(`${title}\n${msg}`);
+  else Alert.alert(title, msg);
 };
 
 type ScreenState = "camera" | "edit";
 
 export default function ConditionScreen() {
   const [screenState, setScreenState] = useState<ScreenState>("camera");
-  const [analysis] = useState<ConditionAnalysisDetailed>(MOCK_ANALYSIS);
+  const [analysis, setAnalysis] = useState<ConditionAnalysisDetailed | null>(null);
 
-  // Editable fields initialized from AI analysis
-  const [energy, setEnergy] = useState(MOCK_ANALYSIS.energy.level);
-  const [mood, setMood] = useState<Mood>(MOCK_ANALYSIS.mood.value);
-  const [stress, setStress] = useState(MOCK_ANALYSIS.stress.level);
-  const [sleep, setSleep] = useState<SleepQuality>(
-    MOCK_ANALYSIS.sleep.quality
-  );
+  const [energy, setEnergy] = useState(5);
+  const [mood, setMood] = useState<Mood>("CALM");
+  const [stress, setStress] = useState(3);
+  const [sleep, setSleep] = useState<SleepQuality>("FAIR");
   const [note, setNote] = useState("");
   const [categories, setCategories] = useState<ExerciseCategory[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const handleCapture = () => {
-    // Mock: simulate AI analysis delay
-    setScreenState("edit");
+  const handleCapture = async () => {
+    setIsAnalyzing(true);
+    const res = await analyzeCondition("mock-base64-image");
+    setIsAnalyzing(false);
+
+    if (res.success && res.data) {
+      const data = res.data;
+      setAnalysis(data);
+      setEnergy(data.energy.level);
+      setMood(data.mood.value as Mood);
+      setStress(data.stress.level);
+      setSleep(data.sleep.quality as SleepQuality);
+      setScreenState("edit");
+    } else {
+      showAlert("분석 실패", res.error?.message || "다시 시도해주세요.");
+    }
   };
 
   const handleRetake = () => {
     setScreenState("camera");
-    // Reset to AI defaults
-    setEnergy(MOCK_ANALYSIS.energy.level);
-    setMood(MOCK_ANALYSIS.mood.value);
-    setStress(MOCK_ANALYSIS.stress.level);
-    setSleep(MOCK_ANALYSIS.sleep.quality);
+    setAnalysis(null);
     setNote("");
     setCategories([]);
   };
@@ -70,17 +64,35 @@ export default function ConditionScreen() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!analysis) return;
     setIsSubmitting(true);
-    // Mock submit
-    setTimeout(() => {
-      setIsSubmitting(false);
-      Alert.alert(
-        "등록 완료",
-        "컨디션이 등록되었습니다. 시퀀스가 생성됩니다.",
-        [{ text: "확인" }]
-      );
-    }, 1500);
+
+    const today = new Date().toISOString().split("T")[0];
+    const res = await registerCondition({
+      date: today,
+      conditionAiRaw: analysis,
+      conditionFinal: {
+        energy,
+        mood,
+        stress,
+        sleep,
+        summary: analysis.summary,
+      },
+      memberNote: note || undefined,
+      requestedCategories: categories,
+    });
+
+    setIsSubmitting(false);
+    if (res.success) {
+      showAlert("등록 완료", "컨디션이 등록되었습니다. 시퀀스가 생성됩니다.");
+      setScreenState("camera");
+      setAnalysis(null);
+      setNote("");
+      setCategories([]);
+    } else {
+      showAlert("등록 실패", res.error?.message || "다시 시도해주세요.");
+    }
   };
 
   // ===== Camera State =====
@@ -103,7 +115,8 @@ export default function ConditionScreen() {
 
           <TouchableOpacity
             onPress={handleCapture}
-            className="w-20 h-20 rounded-full bg-[#6366F1] items-center justify-center"
+            disabled={isAnalyzing}
+            className={`w-20 h-20 rounded-full bg-[#6366F1] items-center justify-center ${isAnalyzing ? "opacity-50" : ""}`}
             style={{
               shadowColor: "#6366F1",
               shadowOffset: { width: 0, height: 4 },
@@ -117,7 +130,7 @@ export default function ConditionScreen() {
             </View>
           </TouchableOpacity>
           <Text className="text-xs text-gray-400 mt-3">
-            촬영 버튼을 눌러주세요
+            {isAnalyzing ? "AI가 분석 중입니다..." : "촬영 버튼을 눌러주세요"}
           </Text>
         </View>
       </SafeAreaView>
@@ -138,7 +151,7 @@ export default function ConditionScreen() {
         </Text>
 
         {/* AI Analysis Result */}
-        <ConditionResult analysis={analysis} />
+        {analysis && <ConditionResult analysis={analysis} />}
 
         {/* Editable Section */}
         <View className="mb-2">

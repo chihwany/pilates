@@ -35,7 +35,7 @@ server/
 ├── package.json
 └── tsconfig.json
 
-shared/
+front/shared/
 └── types.ts                  # FE와 공유하는 타입 (BE가 주도적으로 정의)
 ```
 
@@ -102,7 +102,7 @@ const items = await db.select().from(table)
   .offset((page - 1) * limit);
 ```
 
-### API 타입 공유 (shared/types.ts)
+### API 타입 공유 (front/shared/types.ts)
 ```typescript
 // BE가 먼저 정의하고, FE가 import해서 사용
 export interface ApiResponse<T> {
@@ -138,7 +138,7 @@ export interface CreateMemberRequest { ... }
 
 ## FE와의 협업 규칙
 
-1. API 엔드포인트 구현 전 `shared/types.ts`에 요청/응답 타입 먼저 정의
+1. API 엔드포인트 구현 전 `front/shared/types.ts`에 요청/응답 타입 먼저 정의
 2. FE에서 요청하는 데이터 형식이 있으면 반영
 3. API 완성 시 PM에게 완료 보고 → PM이 FE에게 연동 지시
 4. FE에서 API 호출 이슈 보고 시 우선 대응
@@ -156,7 +156,7 @@ API 엔드포인트 상태:
 - POST /auth/register → 완료 (테스트 통과)
 - POST /auth/login → 완료 (테스트 통과)
 
-shared/types.ts 업데이트:
+front/shared/types.ts 업데이트:
 - AuthResponse, LoginRequest 타입 추가
 
 FE 연동 준비: 완료

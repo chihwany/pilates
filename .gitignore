@@ -5,3 +5,11 @@ node_modules/
 dist/
 .claude/
 *.log
+
+# Frontend
+front/node_modules/
+front/.expo/
+
+# Server
+server/node_modules/
+server/dist/

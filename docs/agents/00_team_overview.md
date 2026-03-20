@@ -19,7 +19,7 @@
 
 ```
 1. 팀장이 Sprint 작업 분배
-2. BE/FE가 병렬 개발 (shared/types.ts로 인터페이스 공유)
+2. BE/FE가 병렬 개발 (front/shared/types.ts로 인터페이스 공유)
 3. BE API 완성 → FE 연동
 4. QA가 통합 테스트
 5. 이슈 발견 → 팀장이 BE/FE에 수정 배정
@@ -32,8 +32,8 @@
 | 영역 | 소유 에이전트 | 경로 |
 |---|---|---|
 | 서버 코드 | 백엔드 | `server/` |
-| 앱 코드 | 프론트엔드 | `app/`, `components/`, `lib/` |
-| 공유 타입 | BE/FE 협의 | `shared/` |
+| 앱 코드 | 프론트엔드 | `front/app/`, `front/components/`, `front/lib/` |
+| 공유 타입 | BE/FE 협의 | `front/shared/` |
 | 테스트 | QA | `tests/`, `__tests__/` |
 | 문서 | 팀장 | `docs/` |
 | 프로젝트 설정 | 팀장 | `CLAUDE.md`, `.env.example` |
@@ -47,7 +47,7 @@
 ```
 
 ### API 계약 (Contract-First)
-1. BE가 API 엔드포인트 구현 전, `shared/types.ts`에 타입 먼저 정의
+1. BE가 API 엔드포인트 구현 전, `front/shared/types.ts`에 타입 먼저 정의
 2. FE는 해당 타입 기반으로 mock 데이터로 UI 개발
 3. BE API 완성 후 FE가 mock → 실제 연동으로 교체
 4. QA가 API + UI 통합 테스트

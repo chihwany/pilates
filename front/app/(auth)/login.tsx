@@ -17,21 +17,12 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-// Mock 로그인 (BE 개발 전)
-const mockLogin = async (email: string, _password: string) => {
-  const isInstructor = email.includes("instructor") || email.includes("강사");
-  return {
-    user: {
-      id: "mock-user-1",
-      email,
-      name: isInstructor ? "김필라 강사" : "이회원",
-      role: (isInstructor ? "instructor" : "member") as "instructor" | "member",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    accessToken: "mock-access-token",
-    refreshToken: "mock-refresh-token",
-  };
+const showAlert = (title: string, msg: string) => {
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n${msg}`);
+  } else {
+    Alert.alert(title, msg);
+  }
 };
 
 export default function LoginScreen() {
@@ -51,17 +42,24 @@ export default function LoginScreen() {
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      // BE 준비 전까지 mock 사용
-      const result = await mockLogin(data.email, data.password);
-      await setAuth(result.user, result.accessToken, result.refreshToken);
+      const response = await loginApi(data);
 
-      if (result.user.role === "instructor") {
+      if (!response.success || !response.data) {
+        const msg = response.error?.message || "이메일 또는 비밀번호를 확인해주세요.";
+        showAlert("로그인 실패", msg);
+        return;
+      }
+
+      const { user, accessToken, refreshToken } = response.data;
+      await setAuth(user, accessToken, refreshToken);
+
+      if (user.role === "instructor") {
         router.replace("/(instructor)");
       } else {
         router.replace("/(member)");
       }
     } catch {
-      Alert.alert("로그인 실패", "이메일 또는 비밀번호를 확인해주세요.");
+      showAlert("로그인 실패", "네트워크 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

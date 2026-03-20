@@ -18,13 +18,13 @@
 ## 담당 영역
 
 ```
-app/                          # 화면 (expo-router)
+front/app/                    # 화면 (expo-router)
 ├── _layout.tsx               # 루트 레이아웃 (인증 체크)
 ├── (auth)/                   # 로그인, 회원가입
 ├── (instructor)/             # 강사 탭: 대시보드, 회원, 스케줄, 세션, 설정
 └── (member)/                 # 회원 탭: 오늘, 컨디션, 기록, 프로필
 
-components/                   # 재사용 컴포넌트
+front/components/             # 재사용 컴포넌트
 ├── ui/                       # Button, Card, Input, Badge, Slider, LoadingSpinner
 ├── camera/                   # FaceCapture
 ├── condition/                # ConditionResult, ConditionEditor, ConditionBadge
@@ -33,11 +33,11 @@ components/                   # 재사용 컴포넌트
 ├── dashboard/                # SessionStatusCard, ConditionSummary
 └── member/                   # MemberCard, BodyConditionTag
 
-lib/                          # 유틸리티
+front/lib/                    # 유틸리티
 ├── api/                      # HTTP 클라이언트 + 엔드포인트별 함수
 ├── stores/                   # Zustand 스토어
 ├── hooks/                    # 커스텀 훅 (TanStack Query)
-├── types/                    # 로컬 타입 (shared/에 없는 것)
+├── types/                    # 로컬 타입 (front/shared/에 없는 것)
 ├── constants/                # 상수 (bodyConditions, exercises, categories)
 └── utils/                    # conditionMapper, notifications, validation
 ```
@@ -104,7 +104,7 @@ export function ComponentName({ prop1, prop2 }: Props) {
 
 ### API 호출 패턴 (TanStack Query)
 ```tsx
-// lib/hooks/useMember.ts
+// front/lib/hooks/useMember.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { Member, CreateMemberRequest } from "@shared/types";
@@ -154,7 +154,7 @@ export function MemberForm() {
 
 ### 인증 상태 (Zustand + SecureStore)
 ```tsx
-// lib/stores/authStore.ts
+// front/lib/stores/authStore.ts
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 
@@ -191,8 +191,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 ```
 1. docs/design/*.svg에서 해당 화면 디자인 확인
 2. docs/04_SCREENS_NAVIGATION.md에서 네비게이션 구조 확인
-3. shared/types.ts에서 사용할 API 타입 확인
-4. 필요한 UI 컴포넌트가 이미 있는지 components/ 확인
+3. front/shared/types.ts에서 사용할 API 타입 확인
+4. 필요한 UI 컴포넌트가 이미 있는지 front/components/ 확인
 5. 없으면 컴포넌트 먼저 생성 → 화면에서 조합
 6. BE API가 미완성이면 mock 데이터로 먼저 개발
 7. BE API 완성 후 mock → 실제 연동 교체
@@ -201,7 +201,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 ## BE API 미완성 시 mock 패턴
 
 ```tsx
-// lib/api/mock.ts - BE 완성 전 임시 사용
+// front/lib/api/mock.ts - BE 완성 전 임시 사용
 export const mockMembers: Member[] = [
   { id: "1", name: "이회원", fitnessLevel: "intermediate", ... },
   { id: "2", name: "박회원", fitnessLevel: "beginner", ... },
@@ -220,7 +220,7 @@ export function useMembers() {
 
 ## BE와의 협업 규칙
 
-1. `shared/types.ts`의 타입을 BE가 먼저 정의하면, 그대로 사용
+1. `front/shared/types.ts`의 타입을 BE가 먼저 정의하면, 그대로 사용
 2. API 응답 형식이 예상과 다르면 PM에게 보고 (직접 BE에 요청하지 않음)
 3. BE API가 준비되지 않은 화면은 mock 데이터로 먼저 개발
 4. 화면 개발 완료 시 PM에게 보고 → BE API 연동 대기 또는 바로 연동
@@ -235,8 +235,8 @@ Sprint: {N}
 - {FE-N-2}: {화면명} ✅ (BE 연동 완료)
 
 컴포넌트 생성:
-- components/ui/Button.tsx ✅
-- components/condition/ConditionEditor.tsx ✅
+- front/components/ui/Button.tsx ✅
+- front/components/condition/ConditionEditor.tsx ✅
 
 BE 연동 대기:
 - POST /condition/analyze → 아직 mock 사용 중

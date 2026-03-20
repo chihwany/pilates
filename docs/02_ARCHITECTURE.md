@@ -108,134 +108,137 @@
 
 ```
 pilates/
-├── docs/                         # 프로젝트 문서
+├── docs/                              # 프로젝트 문서
 │
-├── app/                          # Expo Router - 파일 기반 라우트
-│   ├── _layout.tsx               # 루트 레이아웃 (인증 상태 체크)
-│   ├── index.tsx                 # 엔트리 리다이렉트
-│   ├── (auth)/                   # 인증 그룹
-│   │   ├── _layout.tsx
-│   │   ├── login.tsx             # 로그인 화면
-│   │   └── register.tsx          # 회원가입 화면
-│   ├── (instructor)/             # 강사 탭 그룹
-│   │   ├── _layout.tsx           # 탭 네비게이터
-│   │   ├── dashboard.tsx         # 대시보드 (오늘 세션 현황)
-│   │   ├── members/
-│   │   │   ├── index.tsx         # 회원 목록
-│   │   │   └── [id].tsx          # 회원 상세/편집
-│   │   ├── schedule.tsx          # 주간 수업 스케줄 관리
-│   │   ├── sessions.tsx          # 세션 히스토리
-│   │   └── settings.tsx          # 설정
+├── front/                             # 프론트엔드 (Expo 앱)
+│   ├── app/                           # Expo Router - 파일 기반 라우트
+│   │   ├── _layout.tsx                # 루트 레이아웃 (인증 상태 체크)
+│   │   ├── index.tsx                  # 엔트리 리다이렉트
+│   │   ├── (auth)/                    # 인증 그룹
+│   │   │   ├── _layout.tsx
+│   │   │   ├── login.tsx              # 로그인 화면
+│   │   │   └── register.tsx           # 회원가입 화면
+│   │   ├── (instructor)/              # 강사 탭 그룹
+│   │   │   ├── _layout.tsx            # 탭 네비게이터
+│   │   │   ├── dashboard.tsx          # 대시보드 (오늘 세션 현황)
+│   │   │   ├── members/
+│   │   │   │   ├── index.tsx          # 회원 목록
+│   │   │   │   └── [id].tsx           # 회원 상세/편집
+│   │   │   ├── schedule.tsx           # 주간 수업 스케줄 관리
+│   │   │   ├── sessions.tsx           # 세션 히스토리
+│   │   │   └── settings.tsx           # 설정
+│   │   │
+│   │   │   ※ 모달/스택 화면:
+│   │   │   ├── review.tsx             # 시퀀스 리뷰/편집
+│   │   │   └── member-form.tsx        # 회원 등록/편집 폼
+│   │   │
+│   │   └── (member)/                  # 회원 탭 그룹
+│   │       ├── _layout.tsx            # 탭 네비게이터
+│   │       ├── today.tsx              # 오늘의 시퀀스
+│   │       ├── condition-check.tsx    # 컨디션 체크 (카메라 + 결과 수정 + 카테고리 선택)
+│   │       ├── history.tsx            # 운동 기록
+│   │       └── profile.tsx            # 프로필 편집
 │   │
-│   │   ※ 모달/스택 화면:
-│   │   ├── review.tsx            # 시퀀스 리뷰/편집
-│   │   └── member-form.tsx       # 회원 등록/편집 폼
+│   │       ※ 모달/스택 화면:
+│   │       └── exercise-detail.tsx    # 운동 상세
 │   │
-│   └── (member)/                 # 회원 탭 그룹
-│       ├── _layout.tsx           # 탭 네비게이터
-│       ├── today.tsx             # 오늘의 시퀀스
-│       ├── condition-check.tsx   # 컨디션 체크 (카메라 + 결과 수정 + 카테고리 선택)
-│       ├── history.tsx           # 운동 기록
-│       └── profile.tsx           # 프로필 편집
+│   ├── components/                    # 재사용 컴포넌트
+│   │   ├── camera/
+│   │   │   └── FaceCapture.tsx        # 얼굴 캡처 카메라
+│   │   ├── condition/
+│   │   │   ├── ConditionResult.tsx    # 컨디션 분석 결과 표시
+│   │   │   ├── ConditionEditor.tsx    # 컨디션 결과 수정 UI (슬라이더, 선택지)
+│   │   │   └── ConditionBadge.tsx     # 컨디션 뱃지 (에너지/무드/스트레스)
+│   │   ├── exercise/
+│   │   │   ├── SequenceCard.tsx       # 시퀀스 카드
+│   │   │   ├── ExerciseItem.tsx       # 개별 운동 아이템
+│   │   │   ├── SequenceEditor.tsx     # 드래그 앤 드롭 편집기 (강사용)
+│   │   │   └── CategorySelector.tsx   # 추가 운동 카테고리 선택 (회원용)
+│   │   ├── schedule/
+│   │   │   ├── WeeklySchedule.tsx     # 주간 스케줄 뷰
+│   │   │   └── ScheduleEditor.tsx     # 스케줄 편집 UI
+│   │   ├── member/
+│   │   │   ├── MemberCard.tsx         # 회원 카드 (목록용)
+│   │   │   └── BodyConditionTag.tsx   # 신체 상태 태그
+│   │   ├── dashboard/
+│   │   │   ├── SessionStatusCard.tsx  # 세션 현황 카드 (강사 대시보드)
+│   │   │   └── ConditionSummary.tsx   # 컨디션 체크 현황 요약
+│   │   └── ui/                        # 디자인 시스템
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       ├── Input.tsx
+│   │       ├── Badge.tsx
+│   │       ├── Slider.tsx             # 컨디션 수정용 슬라이더
+│   │       └── LoadingSpinner.tsx
+│   │
+│   ├── lib/                           # 유틸리티 및 비즈니스 로직
+│   │   ├── api/
+│   │   │   ├── client.ts              # HTTP 클라이언트
+│   │   │   ├── auth.ts                # 인증 API
+│   │   │   ├── members.ts             # 회원 API
+│   │   │   ├── condition.ts           # 컨디션 체크 API
+│   │   │   ├── sessions.ts            # 세션 API
+│   │   │   ├── sequences.ts           # 시퀀스 API
+│   │   │   └── schedules.ts           # 스케줄 API
+│   │   ├── stores/
+│   │   │   ├── authStore.ts           # 인증 상태 (Zustand)
+│   │   │   └── conditionStore.ts      # 컨디션 체크 상태
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts             # 인증 훅
+│   │   │   ├── useCamera.ts           # 카메라 훅
+│   │   │   ├── useMember.ts           # 회원 데이터 훅
+│   │   │   ├── useSequence.ts         # 시퀀스 데이터 훅
+│   │   │   └── useNotifications.ts    # Push 알림 훅
+│   │   ├── types/
+│   │   │   └── index.ts               # 공유 TypeScript 타입
+│   │   ├── constants/
+│   │   │   ├── bodyConditions.ts      # 신체 상태 상수
+│   │   │   ├── exercises.ts           # 운동 카테고리/기구 상수
+│   │   │   └── categories.ts          # 추가 운동 카테고리 상수
+│   │   └── utils/
+│   │       ├── conditionMapper.ts     # Claude Vision 응답 → 앱 컨디션 모델 변환
+│   │       ├── notifications.ts       # Push 알림 등록/관리 유틸
+│   │       └── validation.ts          # Zod 스키마
+│   │
+│   ├── shared/                        # 프론트/백 공유
+│   │   └── types.ts                   # 공유 타입 정의
+│   │
+│   ├── app.json                       # Expo 설정
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   └── .gitignore
 │
-│       ※ 모달/스택 화면:
-│       └── exercise-detail.tsx   # 운동 상세
-│
-├── components/                   # 재사용 컴포넌트
-│   ├── camera/
-│   │   └── FaceCapture.tsx       # 얼굴 캡처 카메라
-│   ├── condition/
-│   │   ├── ConditionResult.tsx   # 컨디션 분석 결과 표시
-│   │   ├── ConditionEditor.tsx   # 컨디션 결과 수정 UI (슬라이더, 선택지)
-│   │   └── ConditionBadge.tsx    # 컨디션 뱃지 (에너지/무드/스트레스)
-│   ├── exercise/
-│   │   ├── SequenceCard.tsx      # 시퀀스 카드
-│   │   ├── ExerciseItem.tsx      # 개별 운동 아이템
-│   │   ├── SequenceEditor.tsx    # 드래그 앤 드롭 편집기 (강사용)
-│   │   └── CategorySelector.tsx  # 추가 운동 카테고리 선택 (회원용)
-│   ├── schedule/
-│   │   ├── WeeklySchedule.tsx    # 주간 스케줄 뷰
-│   │   └── ScheduleEditor.tsx    # 스케줄 편집 UI
-│   ├── member/
-│   │   ├── MemberCard.tsx        # 회원 카드 (목록용)
-│   │   └── BodyConditionTag.tsx  # 신체 상태 태그
-│   ├── dashboard/
-│   │   ├── SessionStatusCard.tsx # 세션 현황 카드 (강사 대시보드)
-│   │   └── ConditionSummary.tsx  # 컨디션 체크 현황 요약
-│   └── ui/                       # 디자인 시스템
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       ├── Input.tsx
-│       ├── Badge.tsx
-│       ├── Slider.tsx            # 컨디션 수정용 슬라이더
-│       └── LoadingSpinner.tsx
-│
-├── lib/                          # 유틸리티 및 비즈니스 로직
-│   ├── api/
-│   │   ├── client.ts             # HTTP 클라이언트
-│   │   ├── auth.ts               # 인증 API
-│   │   ├── members.ts            # 회원 API
-│   │   ├── condition.ts          # 컨디션 체크 API
-│   │   ├── sessions.ts           # 세션 API
-│   │   ├── sequences.ts          # 시퀀스 API
-│   │   └── schedules.ts          # 스케줄 API
-│   ├── stores/
-│   │   ├── authStore.ts          # 인증 상태 (Zustand)
-│   │   └── conditionStore.ts     # 컨디션 체크 상태
-│   ├── hooks/
-│   │   ├── useAuth.ts            # 인증 훅
-│   │   ├── useCamera.ts          # 카메라 훅
-│   │   ├── useMember.ts          # 회원 데이터 훅
-│   │   ├── useSequence.ts        # 시퀀스 데이터 훅
-│   │   └── useNotifications.ts   # Push 알림 훅
-│   ├── types/
-│   │   └── index.ts              # 공유 TypeScript 타입
-│   ├── constants/
-│   │   ├── bodyConditions.ts     # 신체 상태 상수
-│   │   ├── exercises.ts          # 운동 카테고리/기구 상수
-│   │   └── categories.ts         # 추가 운동 카테고리 상수
-│   └── utils/
-│       ├── conditionMapper.ts    # Claude Vision 응답 → 앱 컨디션 모델 변환
-│       ├── notifications.ts      # Push 알림 등록/관리 유틸
-│       └── validation.ts         # Zod 스키마
-│
-├── server/                       # 백엔드 서버
+├── server/                            # 백엔드 서버
 │   ├── src/
-│   │   ├── index.ts              # 서버 엔트리포인트
+│   │   ├── index.ts                   # 서버 엔트리포인트
 │   │   ├── routes/
-│   │   │   ├── auth.ts           # 인증 API
-│   │   │   ├── members.ts        # 회원 CRUD
-│   │   │   ├── condition.ts      # 컨디션 분석 API
-│   │   │   ├── sessions.ts       # 세션 CRUD
-│   │   │   ├── sequences.ts      # 시퀀스 생성/수정
-│   │   │   ├── schedules.ts      # 주간 스케줄 관리
-│   │   │   └── exercises.ts      # 운동 카탈로그
+│   │   │   ├── auth.ts                # 인증 API
+│   │   │   ├── members.ts             # 회원 CRUD
+│   │   │   ├── condition.ts           # 컨디션 분석 API
+│   │   │   ├── sessions.ts            # 세션 CRUD
+│   │   │   ├── sequences.ts           # 시퀀스 생성/수정
+│   │   │   ├── schedules.ts           # 주간 스케줄 관리
+│   │   │   └── exercises.ts           # 운동 카탈로그
 │   │   ├── services/
-│   │   │   ├── claude-vision.ts  # Claude Vision API (컨디션 분석)
-│   │   │   ├── claude-text.ts    # Claude Text API (시퀀스 생성)
+│   │   │   ├── claude-vision.ts       # Claude Vision API (컨디션 분석)
+│   │   │   ├── claude-text.ts         # Claude Text API (시퀀스 생성)
 │   │   │   ├── sequence-generator.ts  # 프롬프트 구성 + 시퀀스 생성
 │   │   │   └── push-notification.ts   # Push 알림 발송 서비스
 │   │   ├── jobs/
 │   │   │   ├── condition-reminder.ts  # 12시 컨디션 체크 리마인더
 │   │   │   └── auto-sequence.ts       # 1시 자동 시퀀스 생성
 │   │   ├── db/
-│   │   │   ├── schema.ts         # Drizzle 스키마
-│   │   │   ├── index.ts          # DB 연결
-│   │   │   └── migrations/       # 마이그레이션
+│   │   │   ├── schema.ts              # Drizzle 스키마
+│   │   │   ├── index.ts               # DB 연결
+│   │   │   └── migrations/            # 마이그레이션
 │   │   └── middleware/
-│   │       ├── auth.ts           # JWT 검증
-│   │       └── roleGuard.ts      # 역할 기반 접근 제어
+│   │       ├── auth.ts                # JWT 검증
+│   │       └── roleGuard.ts           # 역할 기반 접근 제어
 │   ├── drizzle.config.ts
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── shared/                       # 프론트/백 공유
-│   └── types.ts                  # 공유 타입 정의
-│
-├── app.json                      # Expo 설정
-├── package.json
-├── tsconfig.json
-├── .env.example
 └── .gitignore
 ```
 
