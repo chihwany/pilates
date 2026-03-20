@@ -12,6 +12,7 @@ import { ConditionResult } from "@/components/condition/ConditionResult";
 import { ConditionEditor } from "@/components/condition/ConditionEditor";
 import { CategorySelector } from "@/components/exercise/CategorySelector";
 import { WebCamera } from "@/components/camera/WebCamera";
+import { NativeCamera } from "@/components/camera/NativeCamera";
 import Button from "@/components/ui/Button";
 import { analyzeCondition, registerCondition } from "@/lib/api/condition";
 import { generateSequence } from "@/lib/api/sequences";
@@ -53,11 +54,6 @@ export default function ConditionScreen() {
       showAlert("분석 실패", res.error?.message || "다시 시도해주세요.");
       setScreenState("camera");
     }
-  };
-
-  /** Native mock capture (until expo-camera integration) */
-  const handleMockCapture = () => {
-    handleAnalyze("mock-base64-image");
   };
 
   const handleRetake = () => {
@@ -171,35 +167,11 @@ export default function ConditionScreen() {
               />
             </View>
           ) : (
-            /* Native: mock camera (expo-camera integration later) */
-            <>
-              <View className="w-64 h-80 bg-gray-100 rounded-3xl items-center justify-center mb-8 border-2 border-dashed border-gray-300">
-                <Text className="text-5xl mb-3">{"📷"}</Text>
-                <Text className="text-sm text-gray-400">카메라 미리보기</Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={handleMockCapture}
-                className="w-20 h-20 rounded-full bg-[#6366F1] items-center justify-center"
-                style={{
-                  shadowColor: "#6366F1",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 6,
-                }}
-              >
-                <View className="w-16 h-16 rounded-full border-4 border-white items-center justify-center">
-                  <Text className="text-2xl">{"📷"}</Text>
-                </View>
-              </TouchableOpacity>
-            </>
-          )}
-
-          {Platform.OS !== "web" && (
-            <Text className="text-xs text-gray-400 mt-3">
-              촬영 버튼을 눌러주세요
-            </Text>
+            /* Native: expo-camera */
+            <NativeCamera
+              onCapture={handleAnalyze}
+              onError={(msg) => showAlert("카메라 오류", msg)}
+            />
           )}
         </View>
       </SafeAreaView>

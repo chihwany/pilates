@@ -34,7 +34,7 @@ export default function MemberHome() {
     } else if (res.error?.code === "NOT_FOUND" || res.error?.statusCode === 404) {
       setSequence(null);
       setScreenState("empty");
-    } else if (res.error?.code === "NETWORK_ERROR") {
+    } else if (res.error?.code === "NETWORK_ERROR" || res.error?.code === "UNAUTHORIZED") {
       setSequence(null);
       setScreenState("empty");
     } else {

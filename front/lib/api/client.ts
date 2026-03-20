@@ -6,6 +6,9 @@ const BASE_URL =
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
+// 401 시 자동 logout 하지 않을 엔드포인트
+const AUTH_ENDPOINTS = ["/auth/login", "/auth/register", "/auth/refresh"];
+
 async function fetchAPI<T>(
   endpoint: string,
   options: {
@@ -37,12 +40,19 @@ async function fetchAPI<T>(
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
 
     if (response.status === 401) {
-      await useAuthStore.getState().logout();
+      const isAuthEndpoint = AUTH_ENDPOINTS.some((ep) => endpoint.startsWith(ep));
+
+      if (!isAuthEndpoint) {
+        // 인증이 필요한 API에서 401이면 토큰 무효화 (자동 logout은 하지 않음)
+        // 로그인 화면 리다이렉트는 AuthGate가 처리
+      }
+
+      const data = await response.json().catch(() => ({}));
       return {
         success: false,
-        error: {
+        error: data.error || {
           code: "UNAUTHORIZED",
-          message: "인증이 만료되었습니다. 다시 로그인해주세요.",
+          message: "인증이 필요합니다. 다시 로그인해주세요.",
           statusCode: 401,
         },
       };

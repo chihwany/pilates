@@ -50,6 +50,9 @@ export function ConditionEditor({
         max={10}
         value={energy}
         onValueChange={onEnergyChange}
+        minLabel="나쁨"
+        maxLabel="좋음"
+        invertColor
       />
 
       {/* Mood selection */}
@@ -87,6 +90,8 @@ export function ConditionEditor({
         max={10}
         value={stress}
         onValueChange={onStressChange}
+        minLabel="적음"
+        maxLabel="많음"
       />
 
       {/* Sleep selection */}

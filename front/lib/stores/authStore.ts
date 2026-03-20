@@ -84,14 +84,27 @@ export const useAuthStore = create<AuthState>((set) => ({
       const userStr = await storage.getItem(USER_KEY);
 
       if (token && userStr) {
-        const user = JSON.parse(userStr) as User;
-        set({
-          token,
-          refreshToken,
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+        // 저장된 토큰이 유효한지 서버에 확인
+        const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
+        try {
+          const res = await fetch(`${BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const user = JSON.parse(userStr) as User;
+            set({ token, refreshToken, user, isAuthenticated: true, isLoading: false });
+          } else {
+            // 토큰 만료 → 저장된 토큰 삭제
+            await storage.deleteItem(ACCESS_TOKEN_KEY);
+            await storage.deleteItem(REFRESH_TOKEN_KEY);
+            await storage.deleteItem(USER_KEY);
+            set({ isLoading: false });
+          }
+        } catch {
+          // 서버 연결 실패 → 일단 저장된 정보로 진행
+          const user = JSON.parse(userStr) as User;
+          set({ token, refreshToken, user, isAuthenticated: true, isLoading: false });
+        }
       } else {
         set({ isLoading: false });
       }
