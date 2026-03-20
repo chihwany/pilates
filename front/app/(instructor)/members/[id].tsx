@@ -114,8 +114,11 @@ export default function MemberDetailScreen() {
       sessionDurationMinutes: 50,
     };
     setEditPreferences({
-      ...prefs,
+      preferredEquipment: prefs.preferredEquipment || [],
       targetMuscles: prefs.targetMuscles || [],
+      avoidExercises: prefs.avoidExercises || [],
+      goals: prefs.goals || [],
+      sessionDurationMinutes: prefs.sessionDurationMinutes || 50,
     });
     setAvoidExercisesText((prefs.avoidExercises || []).join(", "));
     setShowAddCondition(false);
