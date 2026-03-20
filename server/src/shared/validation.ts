@@ -50,6 +50,47 @@ export const updateMemberSchema = z.object({
   notes: z.string().optional(),
 });
 
+// ===== 스케줄 =====
+
+export const createScheduleSchema = z.object({
+  memberId: z.string().uuid("유효한 회원 ID를 입력하세요"),
+  dayOfWeek: z
+    .number()
+    .int()
+    .min(0, "요일은 0(일)~6(토) 사이여야 합니다")
+    .max(6, "요일은 0(일)~6(토) 사이여야 합니다"),
+  startTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "시간 형식은 HH:MM이어야 합니다"),
+});
+
+export const updateScheduleSchema = z.object({
+  memberId: z.string().uuid("유효한 회원 ID를 입력하세요").optional(),
+  dayOfWeek: z
+    .number()
+    .int()
+    .min(0, "요일은 0(일)~6(토) 사이여야 합니다")
+    .max(6, "요일은 0(일)~6(토) 사이여야 합니다")
+    .optional(),
+  startTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "시간 형식은 HH:MM이어야 합니다")
+    .optional(),
+  isActive: z.boolean().optional(),
+});
+
+// ===== 컨디션 =====
+
+export const conditionRegisterSchema = z.object({
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "날짜 형식은 YYYY-MM-DD이어야 합니다"),
+  conditionAiRaw: z.record(z.unknown()).optional(),
+  conditionFinal: z.record(z.unknown()).optional(),
+  memberNote: z.string().optional(),
+  requestedCategories: z.array(z.string()).optional().default([]),
+});
+
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -57,3 +98,6 @@ export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 export type PushTokenInput = z.infer<typeof pushTokenSchema>;
 export type CreateMemberInput = z.infer<typeof createMemberSchema>;
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
+export type CreateScheduleInput = z.infer<typeof createScheduleSchema>;
+export type UpdateScheduleInput = z.infer<typeof updateScheduleSchema>;
+export type ConditionRegisterInput = z.infer<typeof conditionRegisterSchema>;

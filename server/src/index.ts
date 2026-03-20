@@ -6,6 +6,8 @@ import { serve } from "@hono/node-server";
 import { checkDbConnection } from "./db/index";
 import auth from "./routes/auth";
 import membersRouter from "./routes/members";
+import schedulesRouter from "./routes/schedules";
+import conditionRouter from "./routes/condition";
 
 const app = new Hono();
 
@@ -41,6 +43,8 @@ app.get("/health", async (c) => {
 // ---------------------
 app.route("/api/auth", auth);
 app.route("/api/members", membersRouter);
+app.route("/api/schedules", schedulesRouter);
+app.route("/api/condition", conditionRouter);
 
 // ---------------------
 // Global Error Handler

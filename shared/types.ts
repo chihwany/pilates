@@ -164,6 +164,7 @@ export interface WeeklySchedule {
   id: string;
   instructorId: string;
   memberId: string;
+  memberName?: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
@@ -171,3 +172,53 @@ export interface WeeklySchedule {
   createdAt: string;
   updatedAt: string;
 }
+
+// ===== AI 컨디션 분석 (상세) =====
+
+export interface ConditionAnalysisDetailed {
+  energy: { level: number; confidence: number };
+  mood: { value: Mood; confidence: number };
+  stress: { level: number; confidence: number };
+  sleep: { quality: SleepQuality; confidence: number };
+  facialTension: {
+    forehead: { level: number; confidence: number };
+    jaw: { level: number; confidence: number };
+    asymmetry: { value: string; confidence: number };
+  };
+  swelling: { level: SwellingLevel; confidence: number };
+  summary: string;
+  exerciseNote?: string;
+}
+
+// ===== 컨디션 최종 확정 =====
+
+export interface ConditionFinal {
+  energy: number;
+  mood: Mood;
+  stress: number;
+  sleep: SleepQuality;
+  summary: string;
+}
+
+// ===== 오늘 스케줄 항목 =====
+
+export interface TodayScheduleItem {
+  memberId: string;
+  memberName: string;
+  startTime: string;
+  conditionChecked: boolean;
+  sequenceGenerated: boolean;
+}
+
+// ===== 운동 카테고리 =====
+
+export type ExerciseCategory =
+  | "CORE"
+  | "FLEXIBILITY"
+  | "UPPER_BODY"
+  | "LOWER_BODY"
+  | "BALANCE"
+  | "STRETCHING"
+  | "BREATHING"
+  | "POSTURE"
+  | "STRENGTH";
