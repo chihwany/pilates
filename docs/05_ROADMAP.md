@@ -130,6 +130,11 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 | 3-15 | 50분 수업 기준 시퀀스 | 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분), 휴식 15초 |
 | 3-16 | 오늘 탭 빈 상태 UX | "오늘의 컨디션을 체크해 주세요" + 컨디션 체크 버튼, success:true data:null 처리 |
 | 3-17 | 로그아웃 | 회원 프로필 탭 하단 + 강사 설정 탭 하단 |
+| 3-18 | 네이티브 카메라 연동 | NativeCamera.tsx (expo-camera CameraView, 전면 카메라, base64 촬영, 권한 요청 UI), mock 카메라 제거, app.json에 expo-camera 플러그인 추가 |
+| 3-19 | 슬라이더 UX 개선 | 웹: HTML input range, 네이티브: gesture-handler + reanimated. 에너지 "나쁨"~"좋음" 색상 반전, 스트레스 "적음"~"많음", 값 라벨 텍스트화 |
+| 3-20 | 인증 플로우 수정 | 401 자동 logout 제거 (로그인 루프 방지), loadToken에서 /auth/me 유효성 검증, 오늘 탭 401 빈 상태 표시 |
+| 3-21 | CORS + SDK 업그레이드 | 모든 origin 허용 (모바일 개발용), Expo SDK 54 업그레이드 (Expo Go 호환) |
+| 3-22 | react-native-gesture-handler 추가 | 네이티브 슬라이더 스무스 조작용 의존성 추가 |
 
 ### 완료 기준
 - E2E: 촬영 → 컨디션 분석 → 수정 → 카테고리 선택 → 시퀀스 생성 → 확인

@@ -16,7 +16,7 @@
 │  ┌─────────────────┴────────────────────┐               │
 │  │  카메라 (컨디션 체크용 촬영)              │               │
 │  │  - 웹: WebCamera (getUserMedia API)   │               │
-│  │  - 네이티브: expo-camera              │               │
+│  │  - 네이티브: NativeCamera (CameraView)│               │
 │  │  expo-notifications (push 알림)        │               │
 │  └─────────────────┬────────────────────┘               │
 └────────────────────┼────────────────────────────────────┘
@@ -61,10 +61,12 @@
 | 기술 | 버전 | 용도 | 선택 이유 |
 |---|---|---|---|
 | **React Native** | 0.76+ | 크로스 플랫폼 모바일 앱 | iOS/Android 동시 개발, 큰 생태계 |
-| **Expo** | SDK 52+ | 개발 환경, 빌드, 배포 | 관리형 워크플로우로 빠른 개발, OTA 업데이트 |
+| **Expo** | SDK 54 | 개발 환경, 빌드, 배포 | 관리형 워크플로우로 빠른 개발, OTA 업데이트, Expo Go 호환 |
 | **expo-router** | v4 | 파일 기반 라우팅 | 직관적 라우트 구조, 딥링크 자동 지원 |
-| **expo-camera** | - | 카메라 접근 (네이티브) | 컨디션 체크용 얼굴 촬영 (네이티브 환경) |
+| **expo-camera** | - | 카메라 접근 (네이티브) | NativeCamera 컴포넌트: CameraView, 전면 카메라, base64 촬영, 권한 요청 UI |
 | **WebCamera** | - | 웹캠 접근 (웹) | 브라우저 getUserMedia API로 웹캠 캡처 (Platform.OS === "web") |
+| **react-native-gesture-handler** | - | 제스처 처리 | 네이티브 슬라이더 스무스 조작 (컨디션 수정 UI) |
+| **react-native-reanimated** | - | 애니메이션 | 네이티브 슬라이더 애니메이션 |
 | **expo-notifications** | - | Push 알림 | 컨디션 체크 리마인더, 시퀀스 생성 알림 |
 | **NativeWind** | v4 | Tailwind CSS for RN | 빠른 스타일링, 웹 개발자 친화적 |
 | **Zustand** | v5 | 로컬 상태관리 | 보일러플레이트 최소, 간결한 API |
@@ -155,8 +157,8 @@ pilates/
 │   │
 │   ├── components/                    # 재사용 컴포넌트
 │   │   ├── camera/
-│   │   │   ├── WebCamera.tsx          # 웹캠 캡처 (웹 전용, getUserMedia API)
-│   │   │   └── FaceCapture.tsx        # 얼굴 캡처 카메라 (네이티브)
+│   │   │   ├── NativeCamera.tsx       # 네이티브 카메라 (expo-camera CameraView, 전면, base64, 권한 요청)
+│   │   │   └── WebCamera.tsx          # 웹캠 캡처 (웹 전용, getUserMedia API)
 │   │   ├── condition/
 │   │   │   ├── ConditionResult.tsx    # 컨디션 분석 결과 표시
 │   │   │   ├── ConditionEditor.tsx    # 컨디션 결과 수정 UI (슬라이더, 선택지)
@@ -348,10 +350,18 @@ pilates/
      ▼
 [expo-secure-store에 토큰 저장]
      ▼
+[앱 재시작 시 authStore loadToken]
+     │ 저장된 토큰을 /auth/me로 유효성 검증
+     │ 만료/무효 시 토큰 자동 삭제 → 로그인 화면
+     ▼
 [API 요청마다 Authorization: Bearer {token}]
+     │ 401 응답 시 자동 logout 하지 않음 (로그인 루프 방지)
+     │ 오늘 탭 등: 401 시 빈 상태로 표시 (에러 대신)
      ▼
 [서버 미들웨어: JWT 검증 + 역할 확인]
 ```
+
+> **CORS 설정**: 모바일 개발 환경 호환을 위해 모든 origin 허용.
 
 ---
 
