@@ -206,7 +206,8 @@ export function generateSequence(
 
   // 목표 수업 시간 & 운동 수
   const TARGET_DURATION_SECONDS = sessionDurationMinutes * 60;
-  const REST_BETWEEN_SETS_SECONDS = 30; // 세트 간 휴식 + 전환 시간
+  const REST_BETWEEN_SETS_SECONDS = 30; // 세트 간 휴식
+  const TRANSITION_BETWEEN_EXERCISES = 60; // 동작 간 준비/전환 시간 (1분)
   const TARGET_EXERCISE_COUNT = 8; // 목표 운동 수 (워밍업 1 + 메인 6 + 쿨다운 1)
 
   // 워밍업 운동 선택 (1개, ~6분)
@@ -287,9 +288,9 @@ export function generateSequence(
   }
 
   const setsMap: Record<string, number> = {
-    beginner: 4,
-    intermediate: 5,
-    advanced: 5,
+    beginner: 3,
+    intermediate: 4,
+    advanced: 4,
   };
   const repsMap: Record<string, number> = {
     beginner: 10,
@@ -297,10 +298,10 @@ export function generateSequence(
     advanced: 15,
   };
 
-  // 워밍업/쿨다운은 3세트, 메인은 난이도별 세트
+  // 워밍업/쿨다운은 2세트, 메인은 난이도별 세트
   const getExSets = (ex: CatalogExercise, idx: number) => {
     if (idx < warmups.length || idx >= warmups.length + mainExercises.length) {
-      return 3; // 워밍업/쿨다운
+      return 2; // 워밍업/쿨다운
     }
     const diff = ex.difficulty || targetDifficulty;
     return setsMap[diff] || 5;
@@ -337,8 +338,11 @@ export function generateSequence(
       reason = getCategoryReason(ex.category);
     }
 
-    // 운동당 목표 시간 = 총 시간 / 운동 수 (휴식 포함)
-    const targetPerExercise = Math.floor(TARGET_DURATION_SECONDS / allExercises.length);
+    // 동작 간 전환 시간을 제외한 순수 운동 가능 시간
+    const totalTransitionTime = TRANSITION_BETWEEN_EXERCISES * (allExercises.length - 1);
+    const availableExerciseTime = TARGET_DURATION_SECONDS - totalTransitionTime;
+    // 운동당 목표 시간 (세트 간 휴식 포함)
+    const targetPerExercise = Math.floor(availableExerciseTime / allExercises.length);
     const baseDuration = ex.durationSeconds || 60;
     // 세트당 시간 = (운동당 목표 시간 - 세트간 휴식) / 세트 수
     const restTotal = REST_BETWEEN_SETS_SECONDS * (sets - 1);
@@ -359,12 +363,14 @@ export function generateSequence(
     };
   });
 
-  // 총 시간: 운동 시간 + 세트 간 휴식
-  const totalSeconds = exercises.reduce((sum, ex) => {
+  // 총 시간: 운동 시간 + 세트 간 휴식 + 동작 간 전환 시간
+  const totalExerciseSeconds = exercises.reduce((sum, ex) => {
     const exerciseTime = ex.durationSeconds * ex.sets;
     const restTime = REST_BETWEEN_SETS_SECONDS * (ex.sets - 1);
     return sum + exerciseTime + restTime;
   }, 0);
+  const totalTransition = TRANSITION_BETWEEN_EXERCISES * (exercises.length - 1);
+  const totalSeconds = totalExerciseSeconds + totalTransition;
   const totalDurationMinutes = Math.round(totalSeconds / 60);
 
   // 무드 기반 추가 메모

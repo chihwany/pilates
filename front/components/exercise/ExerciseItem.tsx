@@ -92,7 +92,7 @@ export function ExerciseItem({ exercise }: ExerciseItemProps) {
             )}
           </View>
 
-          {/* Sets / reps / duration */}
+          {/* Sets / reps / total duration (including rest) */}
           <View className="flex-row items-center gap-3">
             <Text className="text-sm text-gray-700">
               {exercise.sets}세트
@@ -100,7 +100,7 @@ export function ExerciseItem({ exercise }: ExerciseItemProps) {
             </Text>
             <Text className="text-sm text-gray-400">|</Text>
             <Text className="text-sm text-gray-700">
-              {formatDuration(exercise.durationSeconds)}
+              총 {formatDuration(exercise.durationSeconds * exercise.sets + 30 * (exercise.sets - 1))}
             </Text>
           </View>
 
