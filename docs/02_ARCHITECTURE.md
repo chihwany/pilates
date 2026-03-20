@@ -14,7 +14,9 @@
 │  └─────────────────┬────────────────────┘               │
 │                    │                                     │
 │  ┌─────────────────┴────────────────────┐               │
-│  │  expo-camera (컨디션 체크용 촬영)       │               │
+│  │  카메라 (컨디션 체크용 촬영)              │               │
+│  │  - 웹: WebCamera (getUserMedia API)   │               │
+│  │  - 네이티브: expo-camera              │               │
 │  │  expo-notifications (push 알림)        │               │
 │  └─────────────────┬────────────────────┘               │
 └────────────────────┼────────────────────────────────────┘
@@ -61,7 +63,8 @@
 | **React Native** | 0.76+ | 크로스 플랫폼 모바일 앱 | iOS/Android 동시 개발, 큰 생태계 |
 | **Expo** | SDK 52+ | 개발 환경, 빌드, 배포 | 관리형 워크플로우로 빠른 개발, OTA 업데이트 |
 | **expo-router** | v4 | 파일 기반 라우팅 | 직관적 라우트 구조, 딥링크 자동 지원 |
-| **expo-camera** | - | 카메라 접근 | 컨디션 체크용 얼굴 촬영 |
+| **expo-camera** | - | 카메라 접근 (네이티브) | 컨디션 체크용 얼굴 촬영 (네이티브 환경) |
+| **WebCamera** | - | 웹캠 접근 (웹) | 브라우저 getUserMedia API로 웹캠 캡처 (Platform.OS === "web") |
 | **expo-notifications** | - | Push 알림 | 컨디션 체크 리마인더, 시퀀스 생성 알림 |
 | **NativeWind** | v4 | Tailwind CSS for RN | 빠른 스타일링, 웹 개발자 친화적 |
 | **Zustand** | v5 | 로컬 상태관리 | 보일러플레이트 최소, 간결한 API |
@@ -90,8 +93,16 @@
 |---|---|---|
 | **Claude Vision API** | 얼굴 사진 기반 컨디션 분석 (감정, 에너지, 수면, 근긴장, 부종 등) | 풍부한 자연어 분석, 다면적 컨디션 평가 가능 |
 | **Claude Text API (Sonnet)** | 운동 시퀀스 생성 | 구조화된 JSON 출력, 복합 조건 추론 |
+| **@anthropic-ai/sdk** | Anthropic 공식 Node.js SDK | Claude Vision/Text API 호출에 사용 |
 
 > **참고**: 얼굴 인식/본인 확인은 수행하지 않음. 로그인 기반으로 사용자 식별.
+
+**Claude Vision 연동 상세:**
+- 모델: `claude-sonnet-4-20250514`
+- 응답 패턴: `tool_use`로 구조화된 JSON 응답 강제
+- 서비스 파일: `server/src/services/claude-vision.ts`
+- API 키 없거나 API 호출 실패 시 mock fallback으로 동작
+- `.env`에 `ANTHROPIC_API_KEY` 필요
 
 ### 2.4 인프라
 
@@ -144,7 +155,8 @@ pilates/
 │   │
 │   ├── components/                    # 재사용 컴포넌트
 │   │   ├── camera/
-│   │   │   └── FaceCapture.tsx        # 얼굴 캡처 카메라
+│   │   │   ├── WebCamera.tsx          # 웹캠 캡처 (웹 전용, getUserMedia API)
+│   │   │   └── FaceCapture.tsx        # 얼굴 캡처 카메라 (네이티브)
 │   │   ├── condition/
 │   │   │   ├── ConditionResult.tsx    # 컨디션 분석 결과 표시
 │   │   │   ├── ConditionEditor.tsx    # 컨디션 결과 수정 UI (슬라이더, 선택지)
@@ -221,9 +233,8 @@ pilates/
 │   │   │   ├── schedules.ts           # 주간 스케줄 관리
 │   │   │   └── exercises.ts           # 운동 카탈로그
 │   │   ├── services/
-│   │   │   ├── claude-vision.ts       # Claude Vision API (컨디션 분석)
-│   │   │   ├── claude-text.ts         # Claude Text API (시퀀스 생성)
-│   │   │   ├── sequence-generator.ts  # 프롬프트 구성 + 시퀀스 생성
+│   │   │   ├── claude-vision.ts       # Claude Vision API (@anthropic-ai/sdk, tool_use 패턴, mock fallback)
+│   │   │   ├── sequence-generator.ts  # 프롬프트 구성 + Claude Text API 시퀀스 생성 (50분 수업 기준)
 │   │   │   └── push-notification.ts   # Push 알림 발송 서비스
 │   │   ├── jobs/
 │   │   │   ├── condition-reminder.ts  # 12시 컨디션 체크 리마인더
@@ -485,7 +496,7 @@ pilates/
       "reasonForInclusion": "이 운동을 선택한 이유"
     }
   ],
-  "totalDurationMinutes": 50,
+  "totalDurationMinutes": 50,  // 50분 수업 기준: 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분), 세트 간 휴식 15초
   "focusSummary": "오늘 시퀀스의 전체 요약",
   "conditionNotes": "컨디션 반영 사항 설명"
 }

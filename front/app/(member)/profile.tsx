@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -17,7 +17,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-6 pt-6">
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 40 }}>
         <Text className="text-2xl font-bold text-gray-900 mb-6">내 프로필</Text>
 
         <Card className="mb-4">
@@ -57,8 +57,10 @@ export default function ProfileScreen() {
           <Text className="text-[#6366F1] font-semibold">프로필 편집</Text>
         </TouchableOpacity>
 
-        <Button title="로그아웃" onPress={handleLogout} variant="danger" />
-      </View>
+        <View className="mt-4">
+          <Button title="로그아웃" onPress={handleLogout} variant="danger" />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -27,11 +27,14 @@ export default function MemberHome() {
     if (res.success && res.data) {
       setSequence(res.data);
       setScreenState("ready");
+    } else if (res.success && !res.data) {
+      // 세션/시퀀스 없음 → 빈 상태
+      setSequence(null);
+      setScreenState("empty");
     } else if (res.error?.code === "NOT_FOUND" || res.error?.statusCode === 404) {
       setSequence(null);
       setScreenState("empty");
     } else if (res.error?.code === "NETWORK_ERROR") {
-      // For dev: show empty state on network error (API not running)
       setSequence(null);
       setScreenState("empty");
     } else {
@@ -77,13 +80,13 @@ export default function MemberHome() {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-5xl mb-4">{"🧘‍♀️"}</Text>
           <Text className="text-xl font-bold text-gray-900 mb-2">
-            오늘의 시퀀스가 아직 없습니다
+            오늘의 컨디션을 체크해 주세요
           </Text>
           <Text className="text-sm text-gray-500 text-center mb-8">
-            컨디션을 체크하면 AI가 맞춤 운동 시퀀스를 생성합니다
+            얼굴 촬영으로 컨디션을 분석하고{"\n"}AI가 맞춤 운동 시퀀스를 생성합니다
           </Text>
           <View className="w-full max-w-xs">
-            <Button title="컨디션 체크하기" onPress={goToCondition} />
+            <Button title="컨디션 체크하러 가기" onPress={goToCondition} />
           </View>
         </View>
       </SafeAreaView>

@@ -9,7 +9,7 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 
 ---
 
-## Phase 0: 프로젝트 스캐폴딩
+## Phase 0: 프로젝트 스캐폴딩 ✅ 완료
 
 ### 목표
 개발 환경 구축 및 프로젝트 기초 세팅
@@ -34,7 +34,7 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 
 ---
 
-## Phase 1: 인증 + 회원 프로필
+## Phase 1: 인증 + 회원 프로필 ✅ 완료
 
 ### 목표
 사용자 인증과 회원 프로필 CRUD 완성
@@ -65,7 +65,7 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 
 ---
 
-## Phase 2: 주간 스케줄 + 컨디션 분석
+## Phase 2: 주간 스케줄 + 컨디션 분석 ✅ 완료
 
 ### 목표
 주간 수업 스케줄 관리, 카메라 기반 컨디션 분석 (본인 확인 없이), 회원의 분석 결과 수정 기능
@@ -100,24 +100,36 @@ Phase 0 ──→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 
 
 ---
 
-## Phase 3: LLM 운동 시퀀스 생성
+## Phase 3: LLM 운동 시퀀스 생성 ✅ 완료
 
 ### 목표
 컨디션 + 프로필 기반 맞춤 시퀀스 자동 생성
 
 ### 작업 항목
 
+| # | 작업 | 상세 | 상태 |
+|---|---|---|---|
+| 3-1 | sessions, exerciseSequences 스키마 | Drizzle 스키마 + 마이그레이션 | ✅ |
+| 3-2 | exerciseCatalog 스키마 + 시드 데이터 | 기본 운동 50개+ | ✅ |
+| 3-3 | Claude Text API 서비스 | sequence-generator.ts에 통합 | ✅ |
+| 3-4 | 시퀀스 생성 서비스 | sequence-generator.ts (확장 컨디션 항목 반영 프롬프트) | ✅ |
+| 3-5 | CategorySelector 컴포넌트 | 추가 운동 카테고리 선택 (최대 2개) | ✅ |
+| 3-6 | 세션 CRUD API | POST/GET/PUT /sessions | ✅ |
+| 3-7 | 시퀀스 생성 API | POST /sequences/generate | ✅ |
+| 3-8 | 컨디션 등록 → 시퀀스 생성 연결 | 등록 완료 → 카테고리 선택 → 시퀀스 생성 → 오늘 탭 | ✅ |
+| 3-9 | 오늘의 시퀀스 화면 (회원) | 운동 목록 표시 | ✅ |
+
+### Sprint 3 이후 추가 구현사항
 | # | 작업 | 상세 |
 |---|---|---|
-| 3-1 | sessions, exerciseSequences 스키마 | Drizzle 스키마 + 마이그레이션 |
-| 3-2 | exerciseCatalog 스키마 + 시드 데이터 | 기본 운동 50개+ |
-| 3-3 | Claude Text API 서비스 | claude-text.ts |
-| 3-4 | 시퀀스 생성 서비스 | sequence-generator.ts (확장 컨디션 항목 반영 프롬프트) |
-| 3-5 | CategorySelector 컴포넌트 | 추가 운동 카테고리 선택 (최대 2개) |
-| 3-6 | 세션 CRUD API | POST/GET/PUT /sessions |
-| 3-7 | 시퀀스 생성 API | POST /sequences/generate |
-| 3-8 | 컨디션 등록 → 시퀀스 생성 연결 | 등록 완료 → 카테고리 선택 → 시퀀스 생성 → 오늘 탭 |
-| 3-9 | 오늘의 시퀀스 화면 (회원) | 운동 목록 표시 |
+| 3-10 | Claude Vision API 실제 연동 | @anthropic-ai/sdk, claude-sonnet-4-20250514, tool_use 패턴, mock fallback |
+| 3-11 | 웹캠 촬영 기능 | WebCamera.tsx (브라우저 getUserMedia API), 촬영 이미지 미리보기 |
+| 3-12 | 컨디션 체크 플로우 개선 | 단계별 로딩("컨디션 분석 중"→"등록 중"→"시퀀스 생성 중"), 완료 후 오늘 탭 자동 이동 |
+| 3-13 | memberId 자동 조회 | POST /condition/register에서 로그인 사용자의 members 레코드 자동 조회 |
+| 3-14 | 시퀀스 재생성 시 기존 삭제 | POST /sequences/generate에서 같은 세션 기존 시퀀스 삭제 후 재생성 |
+| 3-15 | 50분 수업 기준 시퀀스 | 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분), 휴식 15초 |
+| 3-16 | 오늘 탭 빈 상태 UX | "오늘의 컨디션을 체크해 주세요" + 컨디션 체크 버튼, success:true data:null 처리 |
+| 3-17 | 로그아웃 | 회원 프로필 탭 하단 + 강사 설정 탭 하단 |
 
 ### 완료 기준
 - E2E: 촬영 → 컨디션 분석 → 수정 → 카테고리 선택 → 시퀀스 생성 → 확인

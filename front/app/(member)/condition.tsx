@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Platform, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Platform, Alert, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type {
@@ -11,6 +11,7 @@ import type {
 import { ConditionResult } from "@/components/condition/ConditionResult";
 import { ConditionEditor } from "@/components/condition/ConditionEditor";
 import { CategorySelector } from "@/components/exercise/CategorySelector";
+import { WebCamera } from "@/components/camera/WebCamera";
 import Button from "@/components/ui/Button";
 import { analyzeCondition, registerCondition } from "@/lib/api/condition";
 import { generateSequence } from "@/lib/api/sequences";
@@ -20,7 +21,7 @@ const showAlert = (title: string, msg: string) => {
   else Alert.alert(title, msg);
 };
 
-type ScreenState = "camera" | "edit";
+type ScreenState = "camera" | "analyzing" | "edit" | "registering" | "generating";
 
 export default function ConditionScreen() {
   const router = useRouter();
@@ -33,13 +34,12 @@ export default function ConditionScreen() {
   const [sleep, setSleep] = useState<SleepQuality>("FAIR");
   const [note, setNote] = useState("");
   const [categories, setCategories] = useState<ExerciseCategory[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const handleCapture = async () => {
-    setIsAnalyzing(true);
-    const res = await analyzeCondition("mock-base64-image");
-    setIsAnalyzing(false);
+  const handleAnalyze = async (base64: string) => {
+    setCapturedImage(base64);
+    setScreenState("analyzing");
+    const res = await analyzeCondition(base64);
 
     if (res.success && res.data) {
       const data = res.data;
@@ -51,12 +51,19 @@ export default function ConditionScreen() {
       setScreenState("edit");
     } else {
       showAlert("분석 실패", res.error?.message || "다시 시도해주세요.");
+      setScreenState("camera");
     }
+  };
+
+  /** Native mock capture (until expo-camera integration) */
+  const handleMockCapture = () => {
+    handleAnalyze("mock-base64-image");
   };
 
   const handleRetake = () => {
     setScreenState("camera");
     setAnalysis(null);
+    setCapturedImage(null);
     setNote("");
     setCategories([]);
   };
@@ -69,7 +76,9 @@ export default function ConditionScreen() {
 
   const handleSubmit = async () => {
     if (!analysis) return;
-    setIsSubmitting(true);
+
+    // 단계 1: 컨디션 등록
+    setScreenState("registering");
 
     const today = new Date().toISOString().split("T")[0];
     const res = await registerCondition({
@@ -86,29 +95,60 @@ export default function ConditionScreen() {
       requestedCategories: categories,
     });
 
-    if (res.success && res.data) {
-      // Trigger sequence generation in background
-      const sessionData = res.data as { sessionId?: string };
-      if (sessionData.sessionId) {
-        generateSequence({ sessionId: sessionData.sessionId }).catch(() => {
-          // Sequence generation happens async; errors handled on today tab
-        });
-      }
-
-      // Reset state
-      setScreenState("camera");
-      setAnalysis(null);
-      setNote("");
-      setCategories([]);
-      setIsSubmitting(false);
-
-      // Navigate to today tab to see loading / result
-      router.replace("/(member)/");
-    } else {
-      setIsSubmitting(false);
+    if (!res.success || !res.data) {
       showAlert("등록 실패", res.error?.message || "다시 시도해주세요.");
+      setScreenState("edit");
+      return;
     }
+
+    // 단계 2: 시퀀스 생성
+    setScreenState("generating");
+
+    const sessionData = res.data as { id?: string };
+    if (sessionData.id) {
+      try {
+        await generateSequence({ sessionId: sessionData.id });
+      } catch {
+        // 시퀀스 생성 실패해도 오늘 탭으로 이동
+      }
+    }
+
+    // 완료 → 오늘 탭으로 이동
+    setScreenState("camera");
+    setAnalysis(null);
+    setCapturedImage(null);
+    setNote("");
+    setCategories([]);
+    router.replace("/(member)/");
   };
+
+  // ===== Loading States =====
+  if (screenState === "analyzing" || screenState === "registering" || screenState === "generating") {
+    const loadingConfig = {
+      analyzing: { emoji: "🔍", title: "컨디션 분석 중", sub: "AI가 얼굴을 분석하고 있습니다..." },
+      registering: { emoji: "📋", title: "컨디션 등록 중", sub: "분석 결과를 저장하고 있습니다..." },
+      generating: { emoji: "🧘‍♀️", title: "시퀀스 생성 중", sub: "AI가 맞춤 운동 시퀀스를 생성하고 있습니다..." },
+    };
+    const config = loadingConfig[screenState];
+
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-5xl mb-6">{config.emoji}</Text>
+          <ActivityIndicator size="large" color="#6366F1" />
+          <Text className="text-xl font-bold text-gray-900 mt-6">
+            {config.title}
+          </Text>
+          <Text className="text-sm text-gray-500 mt-2 text-center">
+            {config.sub}
+          </Text>
+          <Text className="text-xs text-gray-400 mt-6">
+            잠시만 기다려주세요
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // ===== Camera State =====
   if (screenState === "camera") {
@@ -122,31 +162,45 @@ export default function ConditionScreen() {
             얼굴을 촬영하면 AI가 컨디션을 분석합니다
           </Text>
 
-          {/* Mock camera area */}
-          <View className="w-64 h-80 bg-gray-100 rounded-3xl items-center justify-center mb-8 border-2 border-dashed border-gray-300">
-            <Text className="text-5xl mb-3">{"📷"}</Text>
-            <Text className="text-sm text-gray-400">카메라 미리보기</Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={handleCapture}
-            disabled={isAnalyzing}
-            className={`w-20 h-20 rounded-full bg-[#6366F1] items-center justify-center ${isAnalyzing ? "opacity-50" : ""}`}
-            style={{
-              shadowColor: "#6366F1",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 6,
-            }}
-          >
-            <View className="w-16 h-16 rounded-full border-4 border-white items-center justify-center">
-              <Text className="text-2xl">{"📷"}</Text>
+          {Platform.OS === "web" ? (
+            /* Web: live webcam */
+            <View className="mb-2">
+              <WebCamera
+                onCapture={handleAnalyze}
+                onError={(msg) => showAlert("카메라 오류", msg)}
+              />
             </View>
-          </TouchableOpacity>
-          <Text className="text-xs text-gray-400 mt-3">
-            {isAnalyzing ? "AI가 분석 중입니다..." : "촬영 버튼을 눌러주세요"}
-          </Text>
+          ) : (
+            /* Native: mock camera (expo-camera integration later) */
+            <>
+              <View className="w-64 h-80 bg-gray-100 rounded-3xl items-center justify-center mb-8 border-2 border-dashed border-gray-300">
+                <Text className="text-5xl mb-3">{"📷"}</Text>
+                <Text className="text-sm text-gray-400">카메라 미리보기</Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleMockCapture}
+                className="w-20 h-20 rounded-full bg-[#6366F1] items-center justify-center"
+                style={{
+                  shadowColor: "#6366F1",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 6,
+                }}
+              >
+                <View className="w-16 h-16 rounded-full border-4 border-white items-center justify-center">
+                  <Text className="text-2xl">{"📷"}</Text>
+                </View>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {Platform.OS !== "web" && (
+            <Text className="text-xs text-gray-400 mt-3">
+              촬영 버튼을 눌러주세요
+            </Text>
+          )}
         </View>
       </SafeAreaView>
     );
@@ -164,6 +218,19 @@ export default function ConditionScreen() {
         <Text className="text-2xl font-bold text-gray-900 mb-4">
           컨디션 분석 결과
         </Text>
+
+        {/* Captured image thumbnail (web only) */}
+        {capturedImage && Platform.OS === "web" && (
+          <View className="items-center mb-4">
+            <Image
+              source={{ uri: `data:image/jpeg;base64,${capturedImage}` }}
+              className="w-20 h-20 rounded-full"
+              resizeMode="cover"
+              style={{ transform: [{ scaleX: -1 }] }}
+            />
+            <Text className="text-xs text-gray-400 mt-1">이 사진으로 분석했습니다</Text>
+          </View>
+        )}
 
         {/* AI Analysis Result */}
         {analysis && <ConditionResult analysis={analysis} />}
@@ -203,7 +270,6 @@ export default function ConditionScreen() {
           <Button
             title="등록 & 시퀀스 생성"
             onPress={handleSubmit}
-            loading={isSubmitting}
           />
           <Button
             title="다시 촬영"

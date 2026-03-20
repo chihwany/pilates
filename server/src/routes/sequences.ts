@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "../db/index";
 import {
   sessions,
@@ -135,6 +135,11 @@ sequencesRouter.post("/generate", async (c) => {
     catalogForGenerator
   );
 
+  // 기존 시퀀스 삭제 (같은 세션의 이전 시퀀스 교체)
+  await db
+    .delete(exerciseSequences)
+    .where(eq(exerciseSequences.sessionId, session.id));
+
   // DB에 저장
   const [sequence] = await db
     .insert(exerciseSequences)
@@ -145,7 +150,7 @@ sequencesRouter.post("/generate", async (c) => {
       totalDurationMinutes: generated.totalDurationMinutes,
       difficulty: generated.difficulty,
       focusAreas: generated.focusAreas,
-      aiPromptUsed: `mock: energy=${(conditionFinal as any)?.energy?.level ?? "N/A"}, stress=${(conditionFinal as any)?.stress?.level ?? "N/A"}`,
+      aiPromptUsed: `energy=${(conditionFinal as any)?.energy ?? "N/A"}, stress=${(conditionFinal as any)?.stress ?? "N/A"}, categories=${requestedCategories.join(",")}`,
     })
     .returning();
 
@@ -223,11 +228,12 @@ sequencesRouter.get("/today", async (c) => {
     });
   }
 
-  // 시퀀스 찾기
+  // 시퀀스 찾기 (최신순)
   const [sequence] = await db
     .select()
     .from(exerciseSequences)
     .where(eq(exerciseSequences.sessionId, session.id))
+    .orderBy(desc(exerciseSequences.createdAt))
     .limit(1);
 
   if (!sequence) {

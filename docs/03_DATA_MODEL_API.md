@@ -436,10 +436,14 @@ Errors:
 
 #### `POST /api/condition/register`
 컨디션 확정 등록 (회원이 수정한 최종 컨디션 저장)
+
+> **memberId 자동 조회**: `memberId`를 전달하지 않으면 로그인 사용자의 `members` 레코드를 자동 조회하여 사용. 회원이 직접 컨디션 등록 시 `memberId` 전달 불필요.
+
 ```
 Request:
 {
   "date": "2026-03-20",
+  "memberId": "uuid (선택, 미전달 시 로그인 사용자의 members 레코드 자동 조회)",
   "conditionAiRaw": { ... },     // AI 원본 분석 결과
   "conditionFinal": {            // 회원 수정 후 최종
     "energy": 7,
@@ -479,7 +483,9 @@ Response: 201
 `POST /api/sequences/generate` - 시퀀스 생성
 `PUT /api/sequences/:id` - 시퀀스 수정 (강사)
 
-(기존과 동일)
+> **시퀀스 재생성 시 기존 삭제**: `POST /api/sequences/generate`에서 같은 세션의 기존 시퀀스가 있으면 삭제 후 새로 생성. 오늘 탭에서 항상 최신 시퀀스만 표시.
+
+> **50분 수업 기준**: 워밍업 3개(~7분) + 메인 8~12개(~36분) + 쿨다운 3개(~7분) = 총 50분. 세트 간 휴식 15초 포함, 동적 운동 수 조절.
 
 ---
 

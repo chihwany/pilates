@@ -136,23 +136,27 @@ export function generateSequence(
   // 4. 카테고리 기반 선택
   const requestedSet = new Set(requestedCategories);
 
-  // 워밍업 운동 선택 (2개)
+  // 목표 수업 시간: 50분 (3000초)
+  const TARGET_DURATION_SECONDS = 50 * 60;
+  const REST_BETWEEN_SETS_SECONDS = 15; // 세트 간 휴식
+
+  // 워밍업 운동 선택 (3개, ~7분)
   let warmupPool = available.filter((ex) =>
     WARMUP_CATEGORIES.includes(ex.category)
   );
-  if (warmupPool.length === 0) warmupPool = available.slice(0, 3);
-  const warmups = shuffleArray(warmupPool).slice(0, 2);
+  if (warmupPool.length === 0) warmupPool = available.slice(0, 5);
+  const warmups = shuffleArray(warmupPool).slice(0, 3);
 
-  // 쿨다운 운동 선택 (2개)
+  // 쿨다운 운동 선택 (3개, ~7분)
   let cooldownPool = available.filter(
     (ex) =>
       COOLDOWN_CATEGORIES.includes(ex.category) &&
       !warmups.some((w) => w.id === ex.id)
   );
-  if (cooldownPool.length === 0) cooldownPool = available.slice(0, 3);
-  const cooldowns = shuffleArray(cooldownPool).slice(0, 2);
+  if (cooldownPool.length === 0) cooldownPool = available.slice(0, 5);
+  const cooldowns = shuffleArray(cooldownPool).slice(0, 3);
 
-  // 메인 운동 선택 (6~8개)
+  // 메인 운동 선택 (~36분 분량, 동적 개수)
   const usedIds = new Set([
     ...warmups.map((w) => w.id),
     ...cooldowns.map((c) => c.id),
@@ -162,7 +166,7 @@ export function generateSequence(
   );
 
   // requestedCategories가 있으면 해당 카테고리 우선
-  let mainExercises: CatalogExercise[] = [];
+  let mainCandidates: CatalogExercise[] = [];
   if (requestedSet.size > 0) {
     const preferred = shuffleArray(
       mainPool.filter((ex) => requestedSet.has(ex.category))
@@ -170,21 +174,43 @@ export function generateSequence(
     const others = shuffleArray(
       mainPool.filter((ex) => !requestedSet.has(ex.category))
     );
-    mainExercises = [...preferred, ...others].slice(0, 8);
+    mainCandidates = [...preferred, ...others];
   } else {
-    mainExercises = shuffleArray(mainPool).slice(0, 8);
+    mainCandidates = shuffleArray(mainPool);
   }
 
-  // 최소 6개 보장
-  if (mainExercises.length < 6) {
-    const remaining = available.filter(
-      (ex) =>
-        !usedIds.has(ex.id) &&
-        !mainExercises.some((m) => m.id === ex.id)
+  // 워밍업+쿨다운 시간 계산
+  const warmupCooldownSeconds = [...warmups, ...cooldowns].reduce(
+    (sum, ex) => sum + (ex.durationSeconds || 60) * 2, 0
+  );
+  const remainingSeconds = TARGET_DURATION_SECONDS - warmupCooldownSeconds;
+
+  // 메인 운동을 50분에 맞게 동적으로 선택
+  const setsForDifficulty: Record<string, number> = {
+    beginner: 2, intermediate: 3, advanced: 4,
+  };
+  let mainExercises: CatalogExercise[] = [];
+  let mainTotalSeconds = 0;
+
+  for (const ex of mainCandidates) {
+    const diff = ex.difficulty || targetDifficulty;
+    const sets = setsForDifficulty[diff] || 3;
+    const exDuration = (ex.durationSeconds || 60) * sets + REST_BETWEEN_SETS_SECONDS * (sets - 1);
+    if (mainTotalSeconds + exDuration <= remainingSeconds) {
+      mainExercises.push(ex);
+      mainTotalSeconds += exDuration;
+    }
+    if (mainExercises.length >= 14) break; // 최대 14개
+  }
+
+  // 최소 8개 보장
+  if (mainExercises.length < 8) {
+    const remaining = mainCandidates.filter(
+      (ex) => !mainExercises.some((m) => m.id === ex.id)
     );
     mainExercises = [
       ...mainExercises,
-      ...shuffleArray(remaining).slice(0, 6 - mainExercises.length),
+      ...remaining.slice(0, 8 - mainExercises.length),
     ];
   }
 
@@ -203,7 +229,17 @@ export function generateSequence(
     advanced: 12,
   };
 
+  // 워밍업/쿨다운은 2세트로 고정
+  const getExSets = (ex: CatalogExercise, idx: number) => {
+    if (idx < warmups.length || idx >= warmups.length + mainExercises.length) {
+      return 2; // 워밍업/쿨다운
+    }
+    const diff = ex.difficulty || targetDifficulty;
+    return setsMap[diff] || 3;
+  };
+
   const exercises: SequenceExercise[] = allExercises.map((ex, idx) => {
+    const sets = getExSets(ex, idx);
     const diff = ex.difficulty || targetDifficulty;
     let reason: string;
     if (idx < warmups.length) {
@@ -222,7 +258,7 @@ export function generateSequence(
       nameKo: ex.nameKo,
       category: ex.category,
       equipment: ex.equipment || "mat",
-      sets: setsMap[diff] || 3,
+      sets,
       reps: repsMap[diff] || 10,
       durationSeconds: ex.durationSeconds || 60,
       order: idx + 1,
@@ -230,7 +266,12 @@ export function generateSequence(
     };
   });
 
-  const totalSeconds = exercises.reduce((sum, ex) => sum + ex.durationSeconds * ex.sets, 0);
+  // 총 시간: 운동 시간 + 세트 간 휴식
+  const totalSeconds = exercises.reduce((sum, ex) => {
+    const exerciseTime = ex.durationSeconds * ex.sets;
+    const restTime = REST_BETWEEN_SETS_SECONDS * (ex.sets - 1);
+    return sum + exerciseTime + restTime;
+  }, 0);
   const totalDurationMinutes = Math.round(totalSeconds / 60);
 
   // 무드 기반 추가 메모
