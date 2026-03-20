@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="812" viewBox="0 0 780 812">
+  <defs>
+    <style>text { font-family: 'Noto Sans KR', -apple-system, sans-serif; }</style>
+  </defs>
+
+  <!-- ===== 화면 1: 시퀀스 미배정 ===== -->
+  <rect x="0" y="0" width="375" height="812" rx="40" fill="#F8FAFC"/>
+  <text x="187" y="30" font-size="14" font-weight="600" text-anchor="middle" fill="#1E293B">9:41</text>
+
+  <!-- Header -->
+  <text x="24" y="80" font-size="22" font-weight="800" fill="#1E293B">오늘의 운동</text>
+  <text x="24" y="100" font-size="13" fill="#94A3B8">2026.03.20 (목)</text>
+
+  <!-- Empty State -->
+  <text x="187" y="280" font-size="56" text-anchor="middle">📋</text>
+  <text x="187" y="330" font-size="17" font-weight="700" text-anchor="middle" fill="#1E293B">아직 시퀀스가 없습니다</text>
+  <text x="187" y="356" font-size="14" text-anchor="middle" fill="#94A3B8">컨디션 체크를 진행하면</text>
+  <text x="187" y="376" font-size="14" text-anchor="middle" fill="#94A3B8">맞춤 시퀀스가 자동 생성됩니다</text>
+
+  <!-- CTA Button -->
+  <rect x="48" y="410" width="279" height="52" rx="14" fill="#6366F1"/>
+  <text x="187" y="442" font-size="16" font-weight="700" text-anchor="middle" fill="#FFF">컨디션 체크하기 →</text>
+
+  <!-- Deadline Notice -->
+  <rect x="48" y="480" width="279" height="36" rx="8" fill="#FEF3C7"/>
+  <text x="187" y="503" font-size="12" font-weight="500" text-anchor="middle" fill="#92400E">⏰ 오후 1시까지 미체크 시 프로필 기반 자동 생성</text>
+
+  <!-- Tab Bar -->
+  <rect x="0" y="740" width="375" height="72" rx="0" fill="#FFFFFF"/>
+  <line x1="0" y1="740" x2="375" y2="740" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="14" y="750" width="75" height="3" rx="2" fill="#6366F1"/>
+  <text x="51" y="774" font-size="11" font-weight="700" text-anchor="middle" fill="#6366F1">오늘</text>
+  <text x="145" y="774" font-size="11" font-weight="500" text-anchor="middle" fill="#94A3B8">컨디션</text>
+  <text x="234" y="774" font-size="11" font-weight="500" text-anchor="middle" fill="#94A3B8">기록</text>
+  <text x="323" y="774" font-size="11" font-weight="500" text-anchor="middle" fill="#94A3B8">프로필</text>
+  <text x="51" y="796" font-size="18" text-anchor="middle">📅</text>
+  <text x="145" y="796" font-size="18" text-anchor="middle">📷</text>
+  <text x="234" y="796" font-size="18" text-anchor="middle">📊</text>
+  <text x="323" y="796" font-size="18" text-anchor="middle">👤</text>
+
+  <rect x="0" y="0" width="375" height="812" rx="40" fill="none" stroke="#1E293B" stroke-width="2"/>
+
+  <!-- ===== 화면 2: 시퀀스 배정됨 ===== -->
+  <g transform="translate(405, 0)">
+    <rect x="0" y="0" width="375" height="812" rx="40" fill="#F8FAFC"/>
+    <text x="187" y="30" font-size="14" font-weight="600" text-anchor="middle" fill="#1E293B">9:41</text>
+
+    <!-- Header -->
+    <text x="24" y="80" font-size="22" font-weight="800" fill="#1E293B">오늘의 운동</text>
+    <text x="24" y="100" font-size="13" fill="#94A3B8">2026.03.20 (목) · 50분</text>
+
+    <!-- Summary Card -->
+    <rect x="24" y="116" width="327" height="68" rx="14" fill="#EEF2FF"/>
+    <text x="40" y="142" font-size="14" font-weight="700" fill="#4338CA">코어 집중과 유연성 향상</text>
+    <text x="40" y="164" font-size="12" fill="#6366F1">😌 차분 · ⚡ 6/10 · 수면 보통 · 메모: 어깨 뻐근</text>
+
+    <!-- Exercise 1 -->
+    <rect x="24" y="200" width="327" height="76" rx="14" fill="#FFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="44" y="220" font-size="11" font-weight="700" fill="#6366F1">1</text>
+    <circle cx="44" cy="216" r="12" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="68" y="224" font-size="15" font-weight="700" fill="#1E293B">헌드레드</text>
+    <text x="68" y="244" font-size="12" fill="#94A3B8">웜업 · 매트 · 1분</text>
+    <text x="68" y="264" font-size="11" fill="#10B981">호흡 워밍업으로 순환 활성화</text>
+    <text x="327" y="236" font-size="13" fill="#94A3B8" text-anchor="end">▸</text>
+
+    <!-- Exercise 2 -->
+    <rect x="24" y="288" width="327" height="76" rx="14" fill="#FFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="44" y="308" font-size="11" font-weight="700" fill="#6366F1">2</text>
+    <circle cx="44" cy="304" r="12" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="68" y="312" font-size="15" font-weight="700" fill="#1E293B">목·어깨 이완</text>
+    <text x="68" y="332" font-size="12" fill="#94A3B8">스트레칭 · 매트 · 3분</text>
+    <text x="68" y="352" font-size="11" fill="#F59E0B">턱 긴장 감지 → 이완 운동 추가</text>
+    <text x="327" y="324" font-size="13" fill="#94A3B8" text-anchor="end">▸</text>
+
+    <!-- Exercise 3 -->
+    <rect x="24" y="376" width="327" height="76" rx="14" fill="#FFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="44" y="396" font-size="11" font-weight="700" fill="#6366F1">3</text>
+    <circle cx="44" cy="392" r="12" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="68" y="400" font-size="15" font-weight="700" fill="#1E293B">롤업</text>
+    <text x="68" y="420" font-size="12" fill="#94A3B8">코어 · 매트 · 3분 · 2세트</text>
+    <text x="68" y="440" font-size="11" fill="#10B981">코어 안정화 + 척추 분절</text>
+    <text x="327" y="412" font-size="13" fill="#94A3B8" text-anchor="end">▸</text>
+
+    <!-- Exercise 4 -->
+    <rect x="24" y="464" width="327" height="76" rx="14" fill="#FFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="44" y="484" font-size="11" font-weight="700" fill="#6366F1">4</text>
+    <circle cx="44" cy="480" r="12" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="68" y="488" font-size="15" font-weight="700" fill="#1E293B">리포머 풋워크</text>
+    <text x="68" y="508" font-size="12" fill="#94A3B8">하체 · 리포머 · 5분 · 3세트</text>
+    <text x="68" y="528" font-size="11" fill="#10B981">하지 근력 강화 + 정렬</text>
+    <text x="327" y="500" font-size="13" fill="#94A3B8" text-anchor="end">▸</text>
+
+    <!-- Exercise 5 -->
+    <rect x="24" y="552" width="327" height="76" rx="14" fill="#FFF" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="44" y="572" font-size="11" font-weight="700" fill="#6366F1">5</text>
+    <circle cx="44" cy="568" r="12" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="68" y="576" font-size="15" font-weight="700" fill="#1E293B">스파인 스트레치</text>
+    <text x="68" y="596" font-size="12" fill="#94A3B8">유연성 · 매트 · 3분</text>
+    <text x="68" y="616" font-size="11" fill="#10B981">유연성 요청 반영</text>
+    <text x="327" y="588" font-size="13" fill="#94A3B8" text-anchor="end">▸</text>
+
+    <!-- More indicator -->
+    <text x="187" y="660" font-size="12" font-weight="500" text-anchor="middle" fill="#94A3B8">+ 4개 운동 더보기</text>
+
+    <!-- Tab Bar -->
+    <rect x="0" y="740" width="375" height="72" fill="#FFFFFF"/>
+    <line x1="0" y1="740" x2="375" y2="740" stroke="#E2E8F0" stroke-width="1"/>
+    <rect x="14" y="750" width="75" height="3" rx="2" fill="#6366F1"/>
+    <text x="51" y="774" font-size="11" font-weight="700" text-anchor="middle" fill="#6366F1">오늘</text>
+    <text x="145" y="774" font-size="11" text-anchor="middle" fill="#94A3B8">컨디션</text>
+    <text x="234" y="774" font-size="11" text-anchor="middle" fill="#94A3B8">기록</text>
+    <text x="323" y="774" font-size="11" text-anchor="middle" fill="#94A3B8">프로필</text>
+    <text x="51" y="796" font-size="18" text-anchor="middle">📅</text>
+    <text x="145" y="796" font-size="18" text-anchor="middle">📷</text>
+    <text x="234" y="796" font-size="18" text-anchor="middle">📊</text>
+    <text x="323" y="796" font-size="18" text-anchor="middle">👤</text>
+
+    <rect x="0" y="0" width="375" height="812" rx="40" fill="none" stroke="#1E293B" stroke-width="2"/>
+  </g>
+
+  <!-- Labels -->
+  <text x="187" y="-10" font-size="13" font-weight="600" text-anchor="middle" fill="#64748B">시퀀스 미배정</text>
+  <text x="592" y="-10" font-size="13" font-weight="600" text-anchor="middle" fill="#64748B">시퀀스 배정됨</text>
+</svg>
