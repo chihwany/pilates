@@ -48,6 +48,10 @@ export const updateMemberSchema = z.object({
   exercisePreferences: z.record(z.unknown()).optional(),
   fitnessLevel: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   notes: z.string().optional(),
+  isPrenatal: z.boolean().optional(),
+  isPostnatal: z.boolean().optional(),
+  avoidExercises: z.array(z.string()).optional(),
+  sessionDurationMinutes: z.number().int().min(10).max(120).optional(),
 });
 
 // ===== 스케줄 =====

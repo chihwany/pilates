@@ -10,6 +10,22 @@ const exercisesRouter = new Hono();
 // 모든 라우트에 인증 필요
 exercisesRouter.use("*", authMiddleware);
 
+// GET /api/exercises/categories - 카테고리 목록
+exercisesRouter.get("/categories", async (c) => {
+  const exercises = await db
+    .select({ category: exerciseCatalog.category })
+    .from(exerciseCatalog)
+    .where(eq(exerciseCatalog.isActive, true));
+
+  const categories = [...new Set(exercises.map((e) => e.category))].sort();
+
+  return c.json({
+    success: true,
+    data: categories,
+    total: categories.length,
+  });
+});
+
 // GET /api/exercises - 전체 카탈로그 (카테고리/장비/난이도 필터)
 exercisesRouter.get("/", async (c) => {
   const query = c.req.query();

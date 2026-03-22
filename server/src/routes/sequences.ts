@@ -270,6 +270,21 @@ sequencesRouter.get("/today", async (c) => {
 sequencesRouter.get("/:sessionId", async (c) => {
   const sessionId = c.req.param("sessionId");
 
+  // UUID 형식 검증
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(sessionId)) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "유효한 UUID 형식이 아닙니다",
+          statusCode: 400,
+        },
+      },
+      400
+    );
+  }
+
   const [sequence] = await db
     .select()
     .from(exerciseSequences)
@@ -302,6 +317,22 @@ sequencesRouter.get("/:sessionId", async (c) => {
 // PUT /api/sequences/:id - 시퀀스 수정 (강사 전용)
 sequencesRouter.put("/:id", requireRole("instructor"), async (c) => {
   const sequenceId = c.req.param("id");
+
+  // UUID 형식 검증
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(sequenceId)) {
+    return c.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "유효한 UUID 형식이 아닙니다",
+          statusCode: 400,
+        },
+      },
+      400
+    );
+  }
+
   const body = await c.req.json();
   const result = updateSequenceSchema.safeParse(body);
 
@@ -380,6 +411,22 @@ sequencesRouter.delete(
   requireRole("instructor"),
   async (c) => {
     const sequenceId = c.req.param("id");
+
+    // UUID 형식 검증
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(sequenceId)) {
+      return c.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "유효한 UUID 형식이 아닙니다",
+            statusCode: 400,
+          },
+        },
+        400
+      );
+    }
+
     const orderParam = Number(c.req.param("order"));
 
     if (isNaN(orderParam) || orderParam < 0) {

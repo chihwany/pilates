@@ -31,6 +31,16 @@ app.use(
 // ---------------------
 // Health Check
 // ---------------------
+app.get("/api/health", async (c) => {
+  const dbConnected = await checkDbConnection();
+
+  return c.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    db: dbConnected ? "connected" : "disconnected",
+  });
+});
+
 app.get("/health", async (c) => {
   const dbConnected = await checkDbConnection();
 

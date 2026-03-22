@@ -21,7 +21,21 @@ const auth = new Hono();
 
 // POST /api/auth/register
 auth.post("/register", async (c) => {
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json(
+      {
+        error: {
+          code: "INVALID_JSON",
+          message: "요청 본문이 유효한 JSON이 아닙니다",
+          statusCode: 400,
+        },
+      },
+      400
+    );
+  }
   const result = registerSchema.safeParse(body);
 
   if (!result.success) {
@@ -113,7 +127,21 @@ auth.post("/register", async (c) => {
 
 // POST /api/auth/login
 auth.post("/login", async (c) => {
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json(
+      {
+        error: {
+          code: "INVALID_JSON",
+          message: "요청 본문이 유효한 JSON이 아닙니다",
+          statusCode: 400,
+        },
+      },
+      400
+    );
+  }
   const result = loginSchema.safeParse(body);
 
   if (!result.success) {

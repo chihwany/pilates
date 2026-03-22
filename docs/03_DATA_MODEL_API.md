@@ -24,22 +24,31 @@
 | 컬럼 | 타입 | 제약조건 | 설명 |
 |---|---|---|---|
 | id | uuid | PK | 회원 고유 ID |
-| userId | uuid | FK → users.id, NOT NULL | 앱 계정 연결 |
+| userId | uuid | FK → users.id, NULLABLE | 앱 계정 연결 (강사 직접 등록 시 null) |
 | name | text | NOT NULL | 이름 |
 | phone | text | NULLABLE | 연락처 |
 | dateOfBirth | date | NULLABLE | 생년월일 |
 | bodyConditions | jsonb | default: [] | 신체 상태 배열 |
-| exercisePreferences | jsonb | default: {} | 운동 선호도 |
+| exercisePreferences | jsonb | default: {} | 운동 선호도 (아래 참고) |
 | fitnessLevel | enum | NOT NULL, default: 'beginner' | 'beginner' \| 'intermediate' \| 'advanced' |
 | notes | text | NULLABLE | 강사 메모 |
-| isPrenatal | boolean | default: false | 산전 여부 |
-| isPostnatal | boolean | default: false | 산후 여부 |
-| targetMuscles | jsonb | default: [] | 타겟 근육 그룹 배열 |
 | isActive | boolean | default: true | 활성 상태 |
 | createdAt | timestamp | default: now() | 등록일 |
 | updatedAt | timestamp | default: now() | 수정일 |
 
 > 얼굴 사진 등록 관련 필드 없음. 로그인 기반으로 사용자 식별.
+
+**exercisePreferences JSONB에 포함되는 필드:**
+
+| 키 | 타입 | 설명 |
+|---|---|---|
+| isPrenatal | boolean | 산전 여부 (default: false) |
+| isPostnatal | boolean | 산후 여부 (default: false) |
+| targetMuscles | string[] | 타겟 근육 그룹 배열 |
+| avoidExercises | string[] | 피해야 할 운동 목록 |
+| sessionDurationMinutes | number | 세션 시간 (default: 50, 10~120) |
+
+> API 응답에서는 이 필드들이 최상위 레벨로 노출됩니다 (예: `data.isPrenatal`, `data.targetMuscles`).
 
 **targetMuscles 가능한 값:**
 ```
@@ -519,6 +528,7 @@ Response: 201
 
 `GET /api/exercises` - 카탈로그 조회 (354개 운동, 22개 카테고리)
 `GET /api/exercises?search=키워드` - 카탈로그 검색 (이름/한국어명 검색)
+`GET /api/exercises/categories` - 카테고리 목록 조회 (22개 카테고리 배열 반환)
 `POST /api/exercises` - 커스텀 운동 추가 (강사 전용)
 
 ---

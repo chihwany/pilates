@@ -11,6 +11,20 @@ import {
 
 const membersRouter = new Hono();
 
+// exercisePreferences에서 최상위 필드로 노출
+function enrichMemberResponse(m: typeof members.$inferSelect) {
+  const prefs = (m.exercisePreferences || {}) as Record<string, unknown>;
+  return {
+    ...m,
+    isPrenatal: prefs.isPrenatal ?? false,
+    isPostnatal: prefs.isPostnatal ?? false,
+    avoidExercises: prefs.avoidExercises ?? [],
+    sessionDurationMinutes: prefs.sessionDurationMinutes ?? 50,
+    createdAt: m.createdAt.toISOString(),
+    updatedAt: m.updatedAt.toISOString(),
+  };
+}
+
 // 모든 라우트에 인증 필요
 membersRouter.use("*", authMiddleware);
 
@@ -51,11 +65,7 @@ membersRouter.get("/", requireRole("instructor"), async (c) => {
 
   return c.json({
     success: true,
-    data: rows.map((m) => ({
-      ...m,
-      createdAt: m.createdAt.toISOString(),
-      updatedAt: m.updatedAt.toISOString(),
-    })),
+    data: rows.map(enrichMemberResponse),
     pagination: {
       page,
       limit,
@@ -116,11 +126,7 @@ membersRouter.post("/", requireRole("instructor"), async (c) => {
   return c.json(
     {
       success: true,
-      data: {
-        ...newMember,
-        createdAt: newMember.createdAt.toISOString(),
-        updatedAt: newMember.updatedAt.toISOString(),
-      },
+      data: enrichMemberResponse(newMember),
     },
     201
   );
@@ -166,11 +172,7 @@ membersRouter.get("/:id", async (c) => {
 
   return c.json({
     success: true,
-    data: {
-      ...member,
-      createdAt: member.createdAt.toISOString(),
-      updatedAt: member.updatedAt.toISOString(),
-    },
+    data: enrichMemberResponse(member),
   });
 });
 
@@ -227,8 +229,21 @@ membersRouter.put("/:id", async (c) => {
     );
   }
 
+  const { isPrenatal, isPostnatal, avoidExercises, sessionDurationMinutes, ...dbFields } = result.data;
+
+  // isPrenatal, isPostnatal, avoidExercises, sessionDurationMinutes를 exercisePreferences에 병합
+  const existingPrefs = (existing.exercisePreferences || {}) as Record<string, unknown>;
+  const incomingPrefs = (dbFields.exercisePreferences || {}) as Record<string, unknown>;
+  const mergedPrefs = { ...existingPrefs, ...incomingPrefs };
+
+  if (isPrenatal !== undefined) mergedPrefs.isPrenatal = isPrenatal;
+  if (isPostnatal !== undefined) mergedPrefs.isPostnatal = isPostnatal;
+  if (avoidExercises !== undefined) mergedPrefs.avoidExercises = avoidExercises;
+  if (sessionDurationMinutes !== undefined) mergedPrefs.sessionDurationMinutes = sessionDurationMinutes;
+
   const updateData = {
-    ...result.data,
+    ...dbFields,
+    exercisePreferences: mergedPrefs,
     updatedAt: new Date(),
   };
 
@@ -253,11 +268,7 @@ membersRouter.put("/:id", async (c) => {
 
   return c.json({
     success: true,
-    data: {
-      ...updated,
-      createdAt: updated.createdAt.toISOString(),
-      updatedAt: updated.updatedAt.toISOString(),
-    },
+    data: enrichMemberResponse(updated),
   });
 });
 
@@ -292,11 +303,7 @@ membersRouter.delete("/:id", requireRole("instructor"), async (c) => {
 
   return c.json({
     success: true,
-    data: {
-      ...deactivated,
-      createdAt: deactivated!.createdAt.toISOString(),
-      updatedAt: deactivated!.updatedAt.toISOString(),
-    },
+    data: enrichMemberResponse(deactivated!),
   });
 });
 
